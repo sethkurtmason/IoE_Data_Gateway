@@ -61,9 +61,10 @@
  */
 class DATABASE_CONFIG {
 	
-	public $d1_CN = array(
-    'datasource' => 'Rest.RestSource',
-    'host' => 'https://cn.dataone.org/cn/',
+	public $coordnode = array(
+    'datasource' => 'CoordNodeSource',
+    'apiKey'     => '',
+    'host'	=> 'https://cn.dataone.org/cn',
 	);
 
 }

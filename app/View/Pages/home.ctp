@@ -94,7 +94,7 @@ endif;
 if (isset($filePresent)):
 	App::uses('ConnectionManager', 'Model');
 	try {
-		$connected = ConnectionManager::getDataSource('d1_CN');
+		$connected = ConnectionManager::getDataSource('default');
 	} catch (Exception $connectionError) {
 		$connected = false;
 		$errorMsg = $connectionError->getMessage();
@@ -135,11 +135,6 @@ if (isset($filePresent)):
 
 <p>
 	<?php
-		if (CakePlugin::loaded('Rest')):
-			echo '<span class="notice success">';
-				echo __d('cake_dev', 'Rest plugin is present.  ');
-			echo '</span>';
-		endif;
 		if (CakePlugin::loaded('DebugKit')):
 			echo '<span class="notice success">';
 				echo __d('cake_dev', 'DebugKit plugin is present');
