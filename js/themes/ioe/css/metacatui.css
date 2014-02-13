@@ -198,6 +198,63 @@ Bold 700 Italic
   	display: block;
   }
 
+/* MAIN CONTENT CSS
+-------------------------------------------------- */  
+    .logo-bar{
+        min-height: 10px;
+        background-color: #5D6164;
+        margin-top: 30px;
+        margin-bottom: 30px;
+        padding:25px;
+        border-bottom: 1px solid;
+        border-top: 1px solid;
+        boarder-color: white;
+    }
+    .logo-thumbnail {
+        float: none;
+        max-width:200px;
+        margin:15px;
+    }
+    
+    .featurette{
+    	min-height: 0px;
+        margin-top: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .featurette-image{
+    	min-height: 0px;
+        margin-top: 15px;
+        border-width: 1px solid;
+        border-color: black;
+        -webkit-box-shadow: 10px 10px 10px #7C7C7C;
+        box-shadow: 10px 10px 10px #7C7C7C;
+    }
+    
+    .pull-left{
+        float:left;
+        margin-right: 45px;
+    }
+    
+    .pull-right{
+        float:right;
+        margin-left: 45px;
+    }
+    
+    .intro{
+        width: 45%;
+        float: left;
+    }
+    
+    .login-box{
+        margin-left:60%;
+        z-index:9999;
+        background-color: #5D6164;
+        display:block;
+        padding: 15px 25px;
+        -webkit-box-shadow: 20px 20px 20px #7C7C7C;
+        box-shadow: 20px 20px 20px #7C7C7C;
+    }
   
 /* FOOTER CSS
 -------------------------------------------------- */    
@@ -600,6 +657,7 @@ box-shadow:         -2px 0px 10px 0px rgba(50, 50, 50, 0.55);
       position: relative;
       background-color: #899CA6;
       padding-top: 20px;
+      padding-bottom: 20px;
       color: #FDFDFD;
 			min-height: 400px;
     }

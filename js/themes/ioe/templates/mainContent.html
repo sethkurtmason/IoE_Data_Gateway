@@ -1,58 +1,120 @@
 <div class="container">
-  <div class="row-fluid">
-    <img src="./js/themes/ioe/img/ioe_logo.png">
-      <h4>Welcome to the Montana University System's IoE Data Repository</h4>
-      <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-        Nam vitae malesuada ipsum. Mauris malesuada neque eu nisi
-        consequat, ut vulputate odio posuere. Proin tempus lacus
-        ac congue ullamcorper. Aliquam quis massa odio. Nulla at 
-        mi sed sapien iaculis mattis. Nullam eu lectus et purus
-        porttitor pellentesque non et massa. In iaculis lobortis
-        velit ut varius. Morbi rhoncus non diam vitae venenatis. 
-      </p>
-      <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-        Nam vitae malesuada ipsum. Mauris malesuada neque eu nisi
-        consequat, ut vulputate odio posuere. Proin tempus lacus
-        ac congue ullamcorper. Aliquam quis massa odio. Nulla at 
-        mi sed sapien iaculis mattis. Nullam eu lectus et purus
-        porttitor pellentesque non et massa. In iaculis lobortis
-        velit ut varius. Morbi rhoncus non diam vitae venenatis. 
-      </p>
-  </div>
+    <div class="intro">
+     <h2>Empowering Montana's Researchers</h2>
+        <p>
+          The IoE Data Gateway simplifies the task of discovering
+          work produced by others and makes it easy to archive, publish and share
+          your own research findings with peers or the international scientific
+          community. Leverage the IoE Data Getway to increase the impact
+          of your work.
+        </p>
+    </div>
+    <div class="login-box">
+        <h2>Login</h2>
+        <div class="row-fluid">
+            <div class="span10 pagination-right">
+                <form id="loginForm" onsubmit="return submitform(this);" action="/metacat/cgi-bin/register-dataset.cgi" method="post">
+                    <input type="hidden" value="login" name="stage"></input>
+                    <input type="hidden" value="" name="username"></input>
+                    <input type="hidden" value="metacatui" name="cfg"></input>
+                    <div>
+                        <div class="row-fluid">
+                            <div class="span4 text-left">
+    
+                                Username
+    
+                            </div>
+                            <div class="span8 text-left">
+                                <input type="text" value="" name="uid"></input>
+                            </div>
+                        </div>
+                        <div class="row-fluid">
+                            <div class="span4 text-left">
+    
+                                Organization
+    
+                            </div>
+                            <div class="span8 text-left">
+                                <select name="organization">
+                                    <option selected="" value=""></option>
+                                    <option value="MSU">Montana State University</option>
+                                    <option value="UofM">University of Montana</option>
+                                    <option value="MTTech">Montana Tech</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row-fluid">
+                            <div class="span4 text-left">
+    
+                                Password
+    
+                            </div>
+                            <div class="span8 text-left">
+                                <input type="password" value="" maxlength="50" name="password"></input>
+                            </div>
+                        </div>
+                        <div class="row-fluid">
+                            <div class="offset4 span8 text-left">
+                                <input type="hidden" value="Login" name="loginAction"></input>
+                                <input id="loginButton" class="btn" type="button" value="Login"></input>   
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
-<hr>
+<div class="logo-bar">
+    <div class="container pagination-centered">
+        <img class="logo-thumbnail" alt="IoE" src="./js/themes/ioe/img/ioe_logo.png"/>
+        <img class="logo-thumbnail" alt="MUS" src="./js/themes/ioe/img/mus-logo.png"/>
+        <img class="logo-thumbnail" alt="MTEPSCoR" src="./js/themes/ioe/img/mtepscor_logo.png"/>
+        <img class="logo-thumbnail" alt="DataONE" src="./js/themes/ioe/img/dataone-logo-white.png"/>
+    </div>
+</div>
 <div class="container">
-  <div class="row-fluid">
-    <div class="span4 pagination-centered">
-      <img src="./js/themes/ioe/img/cloud-gray-blue.png">
-      <h4>Archive environmental data.</h4>
-      <p>
+    <div class="featurette">
+      <img class="featurette-image pull-left" src="./js/themes/ioe/img/data-archive.png"/>
+      <h2>Archive environmental data.</h2>
+      <p><img class="pull-right" src="./js/themes/ioe/img/cloud-gray-blue.png"/>
         Montana reserachers store environmental and ecological
-        data sets in the IoE Data Repository. Data stored in the
-        IoE Repository is securely copied across the DataONE
+        data sets in the IoE Data Repository. Archived data
+        is securely copied across the DataONE
         cyberinfrastructure network for long term preservation.
       </p>
       <a href="#about" class="btn btn-info">Learn more</a>
+      
     </div>
-    
-    <div class="span4 pagination-centered">            
-      <img src="./js/themes/ioe/img/circles-up-down-arrows.png">
-      <h4 >Publish and share with confidence.</h4>
-      <p>
-        Easily upload data to the IoE Data Repository online, or
+  </div>
+</div>
+<br>
+<br>
+<br>
+<div class="container">
+    <div class="featurette">
+    <img class="featurette-image pull-right" src="./js/themes/ioe/img/data-publish.png"/>
+      <h2>
+      Publish and share with confidence.</h2>
+      <p><img class="pull-right" src="./js/themes/ioe/img/circles-up-down-arrows.png">
+        Easily upload data to the IoE Data Gateway online, or
         use desktop software to describe, manage, and share your data.
-        The IoE Repository supports DOI tagging to
-        permanently publish and recieve credit for your data sets.
+        Use DOI tagging to permanently publish and recieve credit for your data sets.
       </p>
       <a href="#share" class="btn btn-info">Share your data</a>
+      
     </div>
-    
-    <div class="span4 pagination-centered">
-      <img src="./js/themes/ioe/img/square-mag-glass.png">
-      <h4>Execute powerful searches.</h4>
-      <p>
+  </div>
+</div>
+<br>
+<br>
+<br>
+<div class="container">
+    <div class="featurette">
+    <img class="featurette-image pull-left" src="./js/themes/ioe/img/data-search.png"/>
+      <h2>
+        Execute powerful searches.</h2>
+      <p><img class="pull-right" src="./js/themes/ioe/img/square-mag-glass.png">
         Quickly search archived research collections to
         locate data for your next research effort. Connect with potential
         collaborators. Look for data based on interest, keyword
@@ -62,3 +124,6 @@
     </div>
   </div>
 </div>
+<br>
+<br>
+<br>

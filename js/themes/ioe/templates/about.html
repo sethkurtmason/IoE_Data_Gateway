@@ -5,26 +5,26 @@
         <h2>
           <a name="about-the-knb"></a>
           <i class="glyphicons-icon leaf"></i>
-          About the IoE Data Portal
+          About the IoE Data Gateway
         </h2>
         <p class="lead">
-          The Institute on Ecosystems (IoE) is an Montana University System
-          data repository intended to facilitate ecological and environmental
+          The Institute on Ecosystems (IoE) Data Gateway is an Montana University System
+          data repository and discovery system designed to facilitate ecological and environmental
           research.
         </p>
         <img class="pull-right" style="height: 150px;width: 150px; margin: 10px 40px 10px 20px" alt="Data underlies metadata" src="./js/themes/knb/img/data-metadata-graphic.png">
         <p>
-          For scientists, the repository is an efficient way to discover, access and
+          For scientists, the Data Gateway is an efficient way to discover, access and
           interpret complex ecological data. Thanks to rich contextual
           information, scientists are able to integrate and analyze discovered data with
           less effort. The data originate from a highly-distributed set of
           field stations, laboratories, research sites, and individual
-          researchers. The foundation of the IoE repository is rich, detailed metadata
+          researchers. The foundation of the IoE Data Gateway is rich, detailed metadata
           provided by the researchers that collect data, which promotes both
           automated and manual integration of data into new projects.
         </p>
         <p>
-          The IoE repository is powered by the open-source Metacat data management system.
+          The IoE Data Gateway is powered by the open-source Metacat data management system.
           It is optimized for handling data sets described using the Ecological 
           Metadata Language, but can store any XML-based document.
         </p>
@@ -35,20 +35,20 @@
         <h2>
           <a name="using-the-knb"></a>
           <i class="glyphicons-icon thumbs_up"></i>
-          Using the IoE Data Repository
+          Using the IoE Data Gateway
         </h2>
           <p>
-            As a long-term data archive, the IoE repository allows you to preserve your data
+            As a long-term data archive, the IoE Data Gateway allows you to preserve your data
             for future generations of scientists. However, you can also share
-             data with your colleagues today, and get a permanent
-            identifier for all files in your data set. The repository supports <a
+            data with your colleagues today, and get a permanent
+            identifier for all files in your data set. The Gateway's data repository supports <a
             href="http://www.doi.org/">Digital Object Identifiers</a> (DOIs),
             so your data sets can be confidently referenced in any publication.
             And as a <a href="http://dataone.org">DataONE</a> Member Node, the
-            IoE repository will securely replicate you data to other servers, maintaining
+            IoE Data Gateway will securely replicate you data to other servers, maintaining
             all of the access controls you define. This means
-            that your data are secure in the event that the IoE server
-            experience any catastrophic failure.
+            that your data are secure in the unlikely event that the IoE Data Gateway server
+            experiences any catastrophic failure.
           </p>
       </div>
     </div>
@@ -79,7 +79,7 @@
           or analyze your data. Collect these files into a single directory,
           and name them with short but desciptive names. Try to avoid spaces in
           your file names, but rather use dashes "-" or underscores "_". While
-          the IoE repository supports the upload of any data file format, sharing data can
+          the IoE Data Gateway supports the upload of any data file format, sharing data can
           be greatly enhanced if you use ubiquitous, easy-to-read formats. For
           instance, while Microsoft Excel files are commonplace, it's better to
           export these spreadsheets to Comma Separated Values (CSV) text files,
@@ -136,11 +136,44 @@
         <p>
           The two resources above should help in understanding metadata, and
           making the generation of high quality metadata a part of your
-          scientific workflow. For more information, contact <a
-          href="mailto:metacat-dev@ecoinformatics.org">Metacat developers</a>, and we can
-          further help you or your lab in effectively managing data and
-          metadata.
+          scientific workflow. For more information, contact the <a
+          href="mailto:metacat-dev@ecoinformatics.org">Metacat system developers</a>
+          or <a href="mailto:help@data.rcg.montana.edu">IoE staff </a>
+          and we can further help you or your lab in effectively managing data and metadata.
         </p>
+      </div>
+    </div>
+    <div class="row-fluid">
+      <div class="text-left">
+        <h2>
+          <a name="advanced-users"></a>
+          <i class="glyphicons-icon cogwheels"></i>
+          Advanced Users
+        </h2>
+        <h3>
+          <a name="restful-api"></a>
+          RESTful API
+        </h3>
+        <p>
+          The IoE Data Gateway supports the DataONE REST API to provide a
+          common web service interface for users and developers to access
+          and contribute data and metadata. This allows any software
+          tool that supports the <a href="http://mule1.dataone.org/ArchitectureDocs-current/apis/">
+          DataONE API</a> (such as the ONE<i>R</i> <a href="http://releases.dataone.org/online/dataone_r/">DataONE
+          R client</a>) to enable seamless interaction with IoE Data Gateway objects.
+          DataONE maintains the full technical documentation on the <a href=" ">
+          API</a>. All API access is over HTTPS, and accessed via the
+          <code>https://data.rcg.montana.edu/metacat/d1/mn/v1/</code> endpoint. The relative path
+          prefix <code>mn/v1/</code> indicates that we are currently using version 1 of the DataONE
+          API for Member Nodes. 
+        </p>
+        <div class="row-fluid">
+            <div class="text-left">
+                <p> <i class="halflings-icon wrench"></i>  DataONE <a href="http://mule1.dataone.org/OperationDocs/DataONE-Java-Client-Library-HowTo.html">Java Client Library</a></p>
+                <p> <i class="halflings-icon wrench"></i>  DataONE <a href="https://pypi.python.org/pypi/dataone.libclient">Python Client Library</a></p>
+                <p> <i class="halflings-icon wrench"></i>  DataONE <a href="http://releases.dataone.org/online/dataone_r/">R Client Library</a></p>
+            </div>
+        </div>
       </div>
     </div>
     <div class="row-fluid">
@@ -173,7 +206,7 @@
           By marking content as publicly available, you grant this 
           repository, MUS, and any other users the right to copy the
           content and redistribute it to the public without restriction
-          under the terms of <a href="http://creativecommons.org/licenses/by/3.0/ target="_blank">CC-BY</a>.
+          under the terms of <a href="http://creativecommons.org/licenses/by/4.0/legalcode target="_blank">CC-BY</a>.
         </p>
       </div>
     </div>
