@@ -10,7 +10,7 @@ var themeMap =
 		
 		// Templates include extension
 		'templates/app.html' : 'themes/' + theme + '/templates/app.html',
-		//'templates/appHead.html' : 'themes/' + theme + '/templates/appHead.html',
+		'templates/appHead.html' : 'themes/' + theme + '/templates/appHead.html',
 		'templates/navbar.html' : 'themes/' + theme + '/templates/navbar.html',
 		//'templates/featuredData.html' : 'themes/' + theme + '/templates/featuredData.html',
 		'templates/footer.html' : 'themes/' + theme + '/templates/footer.html',

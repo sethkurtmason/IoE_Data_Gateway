@@ -16,12 +16,10 @@ define(['jquery', 'underscore', 'backbone'],
 			pid: null,
 			anchorId: null,
 			page: null,
-			baseUrl: "http://data.rcg.montana.edu/metacat",
-                        //baseUrl: "https://knb.ecoinformatics.org",
+			baseUrl: window.location.origin,
 			// the most likely item to change is the Metacat deployment context
 			context: '/metacat',
-                        d1Service: '/d1/mn/v1',
-			//d1Service: '/knb/d1/mn/v1',
+			d1Service: '/d1/mn/v1',
 			viewServiceUrl: null,
 			packageServiceUrl: null,
 			publishServiceUrl: null,
@@ -43,15 +41,15 @@ define(['jquery', 'underscore', 'backbone'],
 			}
 			
 			// these are pretty standard, but can be customized if needed
-			this.set('viewServiceUrl', this.get('baseUrl') + this.get('d1Service') + '/views/metacatui/');
-			this.set('packageServiceUrl', this.get('baseUrl')+ this.get('d1Service') + '/package/');
-			this.set('publishServiceUrl', this.get('baseUrl') + this.get('d1Service') + '/publish/');
-			this.set('authServiceUrl', this.get('baseUrl')  + this.get('d1Service') + '/isAuthorized/');
-			this.set('queryServiceUrl', this.get('baseUrl') + this.get('d1Service') + '/query/solr/');
-			this.set('metaServiceUrl', this.get('baseUrl') +  this.get('d1Service') + '/meta/');
-			this.set('registryServiceUrl', this.get('baseUrl') + '/cgi-bin/register-dataset.cgi');
-			this.set('ldapwebServiceUrl', this.get('baseUrl') + '/cgi-bin/ldapweb.cgi');
-			this.set('metacatServiceUrl', this.get('baseUrl'));
+			this.set('viewServiceUrl', this.get('baseUrl') + this.get('context') + this.get('d1Service') + '/views/metacatui/');
+			this.set('packageServiceUrl', this.get('baseUrl') + this.get('context') + this.get('d1Service') + '/package/');
+			this.set('publishServiceUrl', this.get('baseUrl') + this.get('context') + this.get('d1Service') + '/publish/');
+			this.set('authServiceUrl', this.get('baseUrl') + this.get('context') + this.get('d1Service') + '/isAuthorized/');
+			this.set('queryServiceUrl', this.get('baseUrl') + this.get('context') + this.get('d1Service') + '/query/solr/');
+			this.set('metaServiceUrl', this.get('baseUrl') + this.get('context') + this.get('d1Service') + '/meta/');
+			this.set('registryServiceUrl', this.get('baseUrl') + this.get('context') + '/cgi-bin/register-dataset.cgi');
+			this.set('ldapwebServiceUrl', this.get('baseUrl') + this.get('context') + '/cgi-bin/ldapweb.cgi');
+			this.set('metacatServiceUrl', this.get('baseUrl') + this.get('context') + '/metacat');
 		}
 	
 		
