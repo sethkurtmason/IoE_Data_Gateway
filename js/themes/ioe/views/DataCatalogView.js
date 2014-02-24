@@ -1397,7 +1397,8 @@ define(['jquery',
                         // Functions to add multiple site markers for each project
                         console.log("Adding site markers");
                         // get the /object for the pid
-			$.get(appModel.get('objectServiceUrl') + pid, function(data) {
+                        //appModel.get('objectServiceUrl') + pid
+			$.get("http://data.rcg.montana.edu/metacat/d1/mn/v1/object/testing.4.5", function(data) {
                         
                                 coverages=data.getElementsByTagName("geographicCoverage");
 
