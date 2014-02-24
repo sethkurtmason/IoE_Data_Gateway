@@ -1401,6 +1401,7 @@ define(['jquery',
                             url: objectServiceUrl + pid,
                             datatype: 'xml',
                             success: function(data, textStatus, xhr) {
+                        
                                 coverages=data.getElementsByTagName("geographicCoverage");
 
                                 for (i=0;i<coverages.length;i++)
@@ -1413,7 +1414,7 @@ define(['jquery',
                                     var w = boundingCoords.getElementsByTagName("westBoundingCoordinate")[0].childNodes[0].nodeValue;
                                     var s = boundingCoords.getElementsByTagName("southBoundingCoordinate")[0].childNodes[0].nodeValue;
                                     var e = boundingCoords.getElementsByTagName("eastBoundingCoordinate")[0].childNodes[0].nodeValue;
-                            
+                            console.log(name)
                                     //Create Google Map LatLng objects out of these coordinates
                                     var latLngSW = new gmaps.LatLng(s, w);
                                     var latLngNE = new gmaps.LatLng(n, e);
