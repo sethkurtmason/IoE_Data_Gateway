@@ -1395,13 +1395,9 @@ define(['jquery',
 			});
                         
                         // Functions to add multiple site markers for each project
-                        var objectServiceUrl = appModel.get('objectServiceUrl');
-                    console.log(objectServiceUrl);
+                        console.log("Adding site markers");
                         // get the /object for the pid
-			$.get(
-                            url: objectServiceUrl + pid,
-                            datatype: 'xml',
-                            success: function(data) {
+			$.get(appModel.get('objectServiceUrl') + pid, function(data) {
                         
                                 coverages=data.getElementsByTagName("geographicCoverage");
 
