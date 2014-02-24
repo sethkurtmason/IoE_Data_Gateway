@@ -28,7 +28,8 @@ define(['jquery', 'underscore', 'backbone'],
 			metaServiceUrl: null,
 			registryServiceUrl: null,
 			ldapwebServiceUrl: null,
-			metacatServiceUrl: null
+			metacatServiceUrl: null,
+                        objectServiceUrl: null,
 		},
 		
 		initialize: function() {
@@ -50,6 +51,7 @@ define(['jquery', 'underscore', 'backbone'],
 			this.set('registryServiceUrl', this.get('baseUrl') + this.get('context') + '/cgi-bin/register-dataset.cgi');
 			this.set('ldapwebServiceUrl', this.get('baseUrl') + this.get('context') + '/cgi-bin/ldapweb.cgi');
 			this.set('metacatServiceUrl', this.get('baseUrl') + this.get('context') + '/metacat');
+                        this.set('objectServiceUrl', this.get('baseUrl') + this.get('context') + this.get('d1Service') + '/object/');
 		}
 	
 		
