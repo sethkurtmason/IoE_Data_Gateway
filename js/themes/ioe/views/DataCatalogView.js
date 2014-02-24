@@ -1396,7 +1396,7 @@ define(['jquery',
                         
                         // Functions to add multiple site markers for each project
                         var objectServiceUrl = appModel.get('objectServiceUrl');
-                    console.log(objectServiceUrl)
+                    console.log(objectServiceUrl);
                         // get the /object for the pid
 			$.get(
                             url: objectServiceUrl + pid,
@@ -1415,7 +1415,7 @@ define(['jquery',
                                     var w = boundingCoords.getElementsByTagName("westBoundingCoordinate")[0].childNodes[0].nodeValue;
                                     var s = boundingCoords.getElementsByTagName("southBoundingCoordinate")[0].childNodes[0].nodeValue;
                                     var e = boundingCoords.getElementsByTagName("eastBoundingCoordinate")[0].childNodes[0].nodeValue;
-                            console.log(name)
+                            console.log(name);
                                     //Create Google Map LatLng objects out of these coordinates
                                     var latLngSW = new gmaps.LatLng(s, w);
                                     var latLngNE = new gmaps.LatLng(n, e);
@@ -1430,7 +1430,7 @@ define(['jquery',
                                     var marker = new google.maps.Marker(
                                     {
                                         position: latLngCEN,
-                                        map: this.map,
+                                        map: map,
                                         title: name,
         				zIndex: 100,
                                         id: name,
