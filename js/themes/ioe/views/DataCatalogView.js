@@ -1394,117 +1394,128 @@ define(['jquery',
 				polygon.setVisible(false);
 			});
                         
-                        // Functions to add multiple site markers for each project
-                        console.log("Adding site markers");
-                        // get the /object for the pid
-                        //appModel.get('objectServiceUrl') + pid
-			$.get("http://data.rcg.montana.edu/metacat/d1/mn/v1/object/testing.4.5", function(data) {
                         
-                                coverages=data.getElementsByTagName("geographicCoverage");
-
-                                for (i=0;i<coverages.length;i++)
-                                {
-                                    coverage=data.getElementsByTagName("geographicCoverage")[i];
-                            
-                                    var name = coverage.getElementsByTagName("geographicDescription")[0].childNodes[0].nodeValue;
-                                    var boundingCoords = coverage.getElementsByTagName("boundingCoordinates")[0];
-                                    var n = boundingCoords.getElementsByTagName("northBoundingCoordinate")[0].childNodes[0].nodeValue;
-                                    var w = boundingCoords.getElementsByTagName("westBoundingCoordinate")[0].childNodes[0].nodeValue;
-                                    var s = boundingCoords.getElementsByTagName("southBoundingCoordinate")[0].childNodes[0].nodeValue;
-                                    var e = boundingCoords.getElementsByTagName("eastBoundingCoordinate")[0].childNodes[0].nodeValue;
-                            console.log(name);
-                                    //Create Google Map LatLng objects out of these coordinates
-                                    var latLngSW = new gmaps.LatLng(s, w);
-                                    var latLngNE = new gmaps.LatLng(n, e);
-                                    var latLngNW = new gmaps.LatLng(n, w);
-                                    var latLngSE = new gmaps.LatLng(s, e);
-                                    
-                                    //Get the centertroid location
-                                    var bounds = new gmaps.LatLngBounds(latLngSW, latLngNE);
-                                    var latLngCEN = bounds.getCenter();
-                                    
-                                    //add the marker to the map
-                                    var marker = new google.maps.Marker(
-                                    {
-                                        position: latLngCEN,
-                                        map: map,
-                                        title: name,
-        				zIndex: 100,
-                                        id: name,
-                                        icon: {
-                                            path: google.maps.SymbolPath.CIRCLE,
-                                            scale: 3,
-                                            strokeColor: '#FF0000',
-                                            fillColor: '#FF0000',
-                                            fillOpacity: 0.35,
-                                        };
-                                    });
-                                    
-                                    ////An infowindow or bubble for each marker
-                                    //var infoWindow = new gmaps.InfoWindow({
-                                    //        content:
-                                    //                '<div class="gmaps-infowindow">'
-                                    //                + '<h4>' + solrResult.get('title') 
-                                    //                + ' ' 
-                                    //                + '<a href="#view/' + pid + '" >'
-                                    //                + solrResult.get('id') 
-                                    //                + '</a>'
-                                    //                + '</h4>'
-                                    //                + '<p>' + name + '</p>'
-                                    //                + '</div>',
-                                    //        isOpen: false,
-                                    //        disableAutoPan: true,
-                                    //        maxWidth: 250
-                                    //});
-                                    //
-                                    //// A small info window with just the title for each marker
-                                    //var titleWindow = new gmaps.InfoWindow({
-                                    //        content: name,
-                                    //        disableAutoPan: true,
-                                    //        maxWidth: 250
-                                    //});
-                                    //
-                                    ////Show the info window upon marker click
-                                    //gmaps.event.addListener(marker, 'click', function() {
-                                    //        titleWindow.close();
-                                    //        infoWindow.open(this.map, marker);
-                                    //        infoWindow.isOpen = true;
-                                    //});
-                                    //
-                                    ////Close the infowindow upon any click on the map
-                                    //gmaps.event.addListener(this.map, 'click', function() {
-                                    //        titleWindow.close();
-                                    //        infoWindow.close();
-                                    //        infoWindow.isOpen = false;
-                                    //});
-                                    //
-                                    //var viewRef = this;
-                                    //
-                                    //// Behavior for marker mouseover
-                                    //gmaps.event.addListener(marker, 'mouseover', function() {
-                                    //        
-                                    //        if(!infoWindow.isOpen){						
-                                    //                //Open the brief title window
-                                    //                titleWindow.open(viewRef.map, marker);	
-                                    //        }
-                                    //        
-                                    //        //Show the data boundaries as a polygon
-                                    //        polygon.setMap(viewRef.map);
-                                    //        polygon.setVisible(true);
-                                    //});
-                                    //
-                                    //// Behavior for marker mouseout
-                                    //gmaps.event.addListener(marker, 'mouseout', function() {
-                                    //        titleWindow.close();
-                                    //        
-                                    //        //Hide the data coverage boundaries polygon
-                                    //        polygon.setVisible(false);
-                                    //});
-                                }; 
-                            };
-                        );
 			
 		},
+                
+                // Add multiple site markers for each object /
+                
+                addSiteMarker: function(solrResult) {
+		    console.log("Adding site markers");
+			
+                    //Skip this if there is no map
+                    if (!gmaps) {
+                            return;
+                    }
+			
+		    var pid = solrResult.get('id');
+                    
+                    // get the /object for the pid
+                    $.get(appModel.get('objectServiceUrl') + pid, function(data) {
+                
+                        coverages=data.getElementsByTagName("geographicCoverage");
+
+                        for (i=0;i<coverages.length;i++)
+                        {
+                            coverage=data.getElementsByTagName("geographicCoverage")[i];
+                    
+                            var name = coverage.getElementsByTagName("geographicDescription")[0].childNodes[0].nodeValue;
+                            var boundingCoords = coverage.getElementsByTagName("boundingCoordinates")[0];
+                            var n = boundingCoords.getElementsByTagName("northBoundingCoordinate")[0].childNodes[0].nodeValue;
+                            var w = boundingCoords.getElementsByTagName("westBoundingCoordinate")[0].childNodes[0].nodeValue;
+                            var s = boundingCoords.getElementsByTagName("southBoundingCoordinate")[0].childNodes[0].nodeValue;
+                            var e = boundingCoords.getElementsByTagName("eastBoundingCoordinate")[0].childNodes[0].nodeValue;
+                    console.log(name);
+                            //Create Google Map LatLng objects out of these coordinates
+                            var latLngSW = new gmaps.LatLng(s, w);
+                            var latLngNE = new gmaps.LatLng(n, e);
+                            var latLngNW = new gmaps.LatLng(n, w);
+                            var latLngSE = new gmaps.LatLng(s, e);
+                            
+                            //Get the centertroid location
+                            var bounds = new gmaps.LatLngBounds(latLngSW, latLngNE);
+                            var latLngCEN = bounds.getCenter();
+                            
+                            //add the marker to the map
+                            var marker = new google.maps.Marker(
+                            {
+                                position: latLngCEN,
+                                map: map,
+                                title: name,
+                                zIndex: 100,
+                                id: name,
+                                icon: {
+                                    path: google.maps.SymbolPath.CIRCLE,
+                                    scale: 3,
+                                    strokeColor: '#FF0000',
+                                    fillColor: '#FF0000',
+                                    fillOpacity: 0.35,
+                                };
+                            });
+                            
+                            //An infowindow or bubble for each marker
+                            var infoWindow = new gmaps.InfoWindow({
+                                    content:
+                                            '<div class="gmaps-infowindow">'
+                                            + '<h4>' + solrResult.get('title') 
+                                            + ' ' 
+                                            + '<a href="#view/' + pid + '" >'
+                                            + solrResult.get('id') 
+                                            + '</a>'
+                                            + '</h4>'
+                                            + '<p>' + name + '</p>'
+                                            + '</div>',
+                                    isOpen: false,
+                                    disableAutoPan: true,
+                                    maxWidth: 250
+                            });
+                            
+                            // A small info window with just the title for each marker
+                            var titleWindow = new gmaps.InfoWindow({
+                                    content: name,
+                                    disableAutoPan: true,
+                                    maxWidth: 250
+                            });
+                            
+                            //Show the info window upon marker click
+                            gmaps.event.addListener(marker, 'click', function() {
+                                    titleWindow.close();
+                                    infoWindow.open(this.map, marker);
+                                    infoWindow.isOpen = true;
+                            });
+                            
+                            //Close the infowindow upon any click on the map
+                            gmaps.event.addListener(this.map, 'click', function() {
+                                    titleWindow.close();
+                                    infoWindow.close();
+                                    infoWindow.isOpen = false;
+                            });
+                            
+                            var viewRef = this;
+                            
+                            // Behavior for marker mouseover
+                            gmaps.event.addListener(marker, 'mouseover', function() {
+                                    
+                                    if(!infoWindow.isOpen){						
+                                            //Open the brief title window
+                                            titleWindow.open(viewRef.map, marker);	
+                                    }
+                                    
+                                    //Show the data boundaries as a polygon
+                                    polygon.setMap(viewRef.map);
+                                    polygon.setVisible(true);
+                            });
+                            
+                            // Behavior for marker mouseout
+                            gmaps.event.addListener(marker, 'mouseout', function() {
+                                    titleWindow.close();
+                                    
+                                    //Hide the data coverage boundaries polygon
+                                    polygon.setVisible(false);
+                            });
+                        }; 
+                    });
+                },
 		
 		openMarker: function(e){
 			//Clear the panning timeout
@@ -1616,7 +1627,8 @@ define(['jquery',
 			
 			// map it
 			if(gmaps){
-				this.addObjectMarker(result);	
+				this.addObjectMarker(result);
+                                this.addSiteMarker(result);
 			}
 
 		},
