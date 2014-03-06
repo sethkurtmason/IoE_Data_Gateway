@@ -30,7 +30,7 @@ require.config({
     moment: '../components/moment',
     registry: [ 
                // use the path fallback in case there is no metacat installed here
-               '/' + metacatContext + '/style/common/templates/metacatui/entryForm',
+               //'/' + metacatContext + '/style/common/templates/metacatui/entryForm',
                // fallback to local version
                'scripts/entryForm'
                 ],
@@ -38,7 +38,8 @@ require.config({
     async: '../components/async',
     recaptcha: [recaptchaURL, 'scripts/placeholder'],
     gmapsAPI: gmapsURL,
-	markerClusterer: '../components/markerclustererplus_2.1.2'
+	markerClusterer: '../components/markerclustererplus_2.1.2',
+	d3: '../components/d3.v3.min'
 
   },
   shim: { /* used for libraries without native AMD support */
@@ -93,6 +94,7 @@ var uiRouter = uiRouter || {};
 var appSearchResults = appSearchResults || {};
 var searchModel = searchModel || {};
 var registryModel = registryModel || {};
+var profileModel = profileModel || {};
 
 /* Setup the application scaffolding first  */
 require(['bootstrap', 'views/AppView', 'models/AppModel'],
@@ -105,8 +107,8 @@ function(Bootstrap, AppView, AppModel) {
 
 	
 	/* Now require the rest of the libraries for the application */
-	require(['backbone', 'routers/router', 'collections/SolrResults', 'models/Search', 'models/RegistryModel'],
-	function(Backbone, UIRouter, SolrResultList, Search, RegistryModel) {
+	require(['backbone', 'routers/router', 'collections/SolrResults', 'models/Search', 'models/RegistryModel', 'models/Profile', 'd3'],
+	function(Backbone, UIRouter, SolrResultList, Search, RegistryModel, Profile, d3) {
 		'use strict';  
 	    		
 		appSearchResults = new SolrResultList([], {});
@@ -115,11 +117,12 @@ function(Bootstrap, AppView, AppModel) {
 		
 		registryModel = new RegistryModel();
 		
+		profileModel = new Profile();
+		
 		// Initialize routing and start Backbone.history()
 		uiRouter = new UIRouter();
-		Backbone.history.start();  
-		
-	    	
+		Backbone.history.start();
+	  
 	});
     	
 });

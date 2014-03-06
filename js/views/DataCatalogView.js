@@ -59,7 +59,8 @@ define(['jquery',
 		markerImage50: './img/markers/orangered-50px-25a.png',
 		
 		markerImage60: './img/markers/orangered-60px-25a.png',
-	
+		
+		reservedMapPhrase: 'Only results with all spatial coverage inside the map',
 		
 		// Delegated events for creating new items, and clearing completed ones.
 		events: {
@@ -91,35 +92,6 @@ define(['jquery',
 		initialize: function () {
 			
 		},
-		
-		triggerSearch: function() {	
-			console.log('Search triggered');			
-			
-			//Set the sort order 
-			var sortOrder = $("#sortOrder").val();
-			searchModel.set('sortOrder', sortOrder);
-			
-			//Trigger a search to load the results
-			appModel.trigger('search');
-			
-			// make sure the browser knows where we are
-			var route = Backbone.history.fragment;
-			if (route.indexOf("data") < 0) {
-				uiRouter.navigate("data");
-			} else {
-				uiRouter.navigate(route);
-			}
-			
-			// ...but don't want to follow links
-			return false;
-		},
-		
-		triggerOnEnter: function(e) {
-			if (e.keyCode != 13) return;
-			
-			//Update the filters
-			this.updateTextFilters(e);
-		},
 				
 		// Render the main view and/or re-render subviews. Don't call .html() here
 		// so we don't lose state, rather use .setElement(). Delegate rendering 
@@ -128,6 +100,7 @@ define(['jquery',
 
 			console.log('Rendering the DataCatalog view');
 			appModel.set('headerType', 'default');
+		
 			
 			//Populate the search template with some model attributes
 			var cel = this.template(
@@ -150,10 +123,6 @@ define(['jquery',
 
 			//Render the Google Map
 			this.renderMap();	
-
-					
-			//Update the year slider
-			this.updateYearRange(); 
 			
 			//Initialize the tooltips
 			$('.tooltip-this').tooltip();
@@ -165,6 +134,9 @@ define(['jquery',
 			//Initialize the jQueryUI button checkboxes
 			$( "#filter-year" ).buttonset();
 			$( "#includes-files-buttonset" ).buttonset();
+			
+			//Update the year slider
+			this.updateYearRange(); 
 			
 			//Iterate through each search model text attribute and show UI filter for each
 			var categories = ['all', 'creator', 'taxon'];
@@ -178,6 +150,11 @@ define(['jquery',
 			}			
 			// the additional fields
 			this.showAdditionalCriteria();
+			
+			// Add the custom query under the "Anything" filter
+			if(searchModel.get('customQuery')){
+				this.showFilter("all", searchModel.get('customQuery'));
+			}
 			
 			// Register listeners; this is done here in render because the HTML
 			// needs to be bound before the listenTo call can be made
@@ -206,33 +183,35 @@ define(['jquery',
 		},
 		
 		renderMap: function() {
-			console.log('rendering map');
+			
+			//If gmaps isn't enabled or loaded with an error, use list mode
 			if (!gmaps) {
 				this.ready = true;
 				appModel.set('searchMode', 'list');
 				return;
+			}		
+
+			// If the list mode is currently in use, no need to render the map
+			if(appModel.get('searchMode') == 'list'){
+				this.ready = true;
+				return;
 			}
 			
-			// set to map mode
-			appModel.set('searchMode', 'map');
 			$("body").addClass("mapMode");				
-			
-			//Set a reserved phrase for the map filter
-			this.reservedMapPhrase = "Only results with any spatial coverage inside the map";
-			
+					
 			//If the spatial filters are set, rezoom and recenter the map to those filters
 			if(searchModel.get('north')){
 				var mapZoom = searchModel.get('map').zoom;
 				var mapCenter = searchModel.get('map').center;
 			}
 			else{
-				var mapZoom = 7;
-				var mapCenter = new gmaps.LatLng(46.2, -110.0);
+				var mapZoom = 3;
+				var mapCenter = new gmaps.LatLng(-15.0, 0.0);
 			}
 			
 			var mapOptions = {
 			    zoom: mapZoom,
-				minZoom: 7,
+				minZoom: 3,
 			    center: mapCenter,
 				disableDefaultUI: true,
 			    zoomControl: true,
@@ -288,7 +267,6 @@ define(['jquery',
 						
 						//Add a new visual 'current filter' to the DOM for the spatial search
 						viewRef.showFilter('spatial', viewRef.reservedMapPhrase, true);
-					
 					}
 					
 					//Trigger a new search
@@ -338,6 +316,35 @@ define(['jquery',
 			this.hideFilter($('#current-spatial-filters').find('[data-term="'+ this.reservedMapPhrase +'"]'));
 		},
 		
+		triggerSearch: function() {	
+			console.log('Search triggered');			
+			
+			//Set the sort order 
+			var sortOrder = $("#sortOrder").val();
+			searchModel.set('sortOrder', sortOrder);
+			
+			//Trigger a search to load the results
+			appModel.trigger('search');
+			
+			// make sure the browser knows where we are
+			var route = Backbone.history.fragment;
+			if (route.indexOf("data") < 0) {
+				uiRouter.navigate("data");
+			} else {
+				uiRouter.navigate(route);
+			}
+			
+			// ...but don't want to follow links
+			return false;
+		},
+		
+		triggerOnEnter: function(e) {
+			if (e.keyCode != 13) return;
+			
+			//Update the filters
+			this.updateTextFilters(e);
+		},
+		
 		/* 
 		 * showResults gets all the current search filters from the searchModel, creates a Solr query, and runs that query.
 		 */
@@ -349,35 +356,42 @@ define(['jquery',
 				page = 0;
 			}
 					
-			this.removeAll();
+			this.loading();
 			
 			var sortOrder = searchModel.get('sortOrder');
 			
 			appSearchResults.setrows(200);
 			appSearchResults.setSort(sortOrder);
 			
-			var fields = "id,title,origin,pubDate,dateUploaded,abstract,resourceMap,beginDate,endDate";
+			var fields = "id,title,origin,pubDate,dateUploaded,abstract,resourceMap,beginDate,endDate,read_count_i";
 			if(gmaps){
 				fields += ",northBoundCoord,southBoundCoord,eastBoundCoord,westBoundCoord";
 			}
 			appSearchResults.setfields(fields);
 			
 			//Create the filter terms from the search model and create the query
-			var query = "formatType:METADATA";
-			var filterQuery = "&fq=-obsoletedBy:*";
+			var query = "formatType:METADATA+-obsoletedBy:*";
+			var filterQuery = "";
 			
 			//Function here to check for spaces in a string - we'll use this to url encode the query
-			var phrase = function(entry){
+			var needsQuotes = function(entry){
+				//Check for spaces
 				var space = null;
 				
 				space = entry.indexOf(" ");
 				
-				if(space < 0){
-					return false;
-				}
-				else{
+				if(space >= 0){
 					return true;
 				}
+				
+				//Check for the colon : character
+				var colon = null;
+				colon = entry.indexOf(":");
+				if(colon >= 0){
+					return true;
+				}
+				
+				return false;
 			};
 			
 			/* Add trim() function for IE*/
@@ -388,10 +402,7 @@ define(['jquery',
 			}
 			
 			//**Get all the search model attributes**
-			
-			//Start with the 'all' category
-			var search = searchModel.get('all');
-			
+		
 			//resourceMap
 			var resourceMap = searchModel.get('resourceMap');
 			if(resourceMap){
@@ -407,8 +418,8 @@ define(['jquery',
 				//Trim the spaces off
 				thisAttribute = attribute[i].trim();
 				
-				// Is this a phrase?
-				if (phrase(thisAttribute)){
+				// Does this need to be wrapped in quotes?
+				if (needsQuotes(thisAttribute)){
 					thisAttribute = thisAttribute.replace(" ", "%20");
 					thisAttribute = "%22" + thisAttribute + "%22";
 				}
@@ -424,8 +435,8 @@ define(['jquery',
 				//Trim the spaces off
 				thisAll = all[i].trim();
 				
-				//Is this a phrase?
-				if(phrase(thisAll)){
+				//Does this need to be wrapped in quotes?
+				if(needsQuotes(thisAll)){
 					thisAll = thisAll.replace(" ", "%20");
 					filterQuery += "&fq=*%22" + thisAll + "%22*";
 				}
@@ -441,8 +452,8 @@ define(['jquery',
 				//Trim the spaces off
 				thisCreator = creator[i].trim();
 				
-				//Is this a phrase?
-				if(phrase(thisCreator)){
+				//Does this need to be wrapped in quotes?
+				if(needsQuotes(thisCreator)){
 					thisCreator = thisCreator.replace(" ", "%20");
 					filterQuery += "&fq=origin:*%22" + thisCreator + "%22*";
 				}
@@ -458,8 +469,8 @@ define(['jquery',
 				//Trim the spaces off
 				thisTaxon = taxon[i].trim();
 				
-				// Is this a phrase?
-				if (phrase(thisTaxon)){
+				// Does this need to be wrapped in quotes?
+				if (needsQuotes(thisTaxon)){
 					thisTaxon = thisTaxon.replace(" ", "%20");
 					thisTaxon = "%22" + thisTaxon + "%22";
 				}
@@ -492,6 +503,12 @@ define(['jquery',
 			_.each(registryCriteria, function(value, key, list) {
 				filterQuery += "&fq=" + value;
 			});
+			
+			//Custom query (passed from the router)
+			var customQuery = searchModel.get('customQuery');
+			if(customQuery){
+				query += customQuery;
+			}
 			
 			//Year
 			//Get the types of year to be searched first
@@ -547,8 +564,8 @@ define(['jquery',
 				//Trim the spaces off
 				thisSpatial = spatial[i].trim();
 				
-				//Is this a phrase?
-				if(phrase(thisSpatial)){
+				//Does this need to be wrapped in quotes?
+				if(needsQuotes(thisSpatial)){
 					thisSpatial = thisSpatial.replace(" ", "%20");
 					query += "&fq=site:*%22" + thisSpatial + "%22*";
 				}
@@ -604,24 +621,65 @@ define(['jquery',
 			// Get the minimum and maximum values from the input fields
 			var minVal = $('#min_year').val();
 			var maxVal = $('#max_year').val();
+			  
+			//Get the default minimum and maximum values
+			var defaultMinYear = searchModel.defaults.yearMin;
+			var defaultMaxYear = searchModel.defaults.yearMax;
 			
-			//Also update the search model
-		    searchModel.set('yearMin', minVal);
-		    searchModel.set('yearMax', maxVal);
-			
-			//Get the minimum and maximum values from the metacat results
-			var minResultsVal = appSearchResults.minYear;
-			var maxResultsVal = appSearchResults.maxYear;
+			// If either of the year type selectors is what brought us here, then determine whether the user
+			// is completely removing both (reset both year filters) or just one (remove just that one filter)
+			if((e !== undefined)){
+				if(($(e.target).attr('id') == "data_year") || ($(e.target).attr('id') == "publish_year")){
+					var pubYearChecked  = $('#publish_year').prop('checked');
+					var dataYearChecked = $('#data_year').prop('checked');
+					
+					//When both are unchecked, assume user wants to reset the year filter
+					if((!pubYearChecked) && (!dataYearChecked)){
+						//Reset the search model
+						searchModel.set('yearMin', defaultMinYear);
+						searchModel.set('yearMax', defaultMaxYear);
+						searchModel.set('dataYear', false);
+						searchModel.set('pubYear', false);
 						
+						//Reset the number inputs
+						$('#min_year').val(defaultMinYear);
+						$('#max_year').val(defaultMaxYear);
+						
+						//Slide the handles back to the defaults
+						$('#year-range').slider("values", [defaultMinYear, defaultMaxYear]);
+						
+						return;
+					}
+				}	
+			}
 			
+			//If either of the year inputs have changed
+			if((minVal != defaultMinYear) || (maxVal != defaultMaxYear)){
+				
+				//Update the search model to match what is in the text inputs
+			    searchModel.set('yearMin', $('#min_year').val());
+			    searchModel.set('yearMax', $('#max_year').val());	
+			    
+			    //auto choose the year type for the user
+			    this.selectYearType();
+			    
+				  //Route to page 1
+			      this.updatePageNumber(0);
+				      
+				 //Trigger a new search
+				 this.triggerSearch();
+			}
+
+		      			
 			//jQueryUI slider 
 			$('#year-range').slider({
 			    range: true,
 			    disabled: false,
-			    min: minResultsVal,			//sets the minimum on the UI slider on initialization
-			    max: maxResultsVal, 		//sets the maximum on the UI slider on initialization
-			    values: [ minVal, maxVal ], //where the left and right slider handles are
+			    min: searchModel.defaults.yearMin,	//sets the minimum on the UI slider on initialization
+			    max: searchModel.defaults.yearMax, 	//sets the maximum on the UI slider on initialization
+			    values: [ searchModel.get('yearMin'), searchModel.get('yearMax') ], //where the left and right slider handles are
 			    stop: function( event, ui ) {
+			    	
 			      // When the slider is changed, update the input values
 			      $('#min_year').val(ui.values[0]);
 			      $('#max_year').val(ui.values[1]);
@@ -629,28 +687,37 @@ define(['jquery',
 			      //Also update the search model
 			      searchModel.set('yearMin', $('#min_year').val());
 			      searchModel.set('yearMax', $('#max_year').val());
-			     
-			      var pubYearChecked  = $('#publish_year').prop('checked');
-			      var dataYearChecked = $('#data_year').prop('checked');
 			      
-			      //If neither the publish year or data coverage year are checked
-			      if((!pubYearChecked) && (!dataYearChecked)){
-			    	  //Then we want to check the data coverage year on the user's behalf
-			    	  $('#data_year').prop('checked', 'true');
-			    	  //And update the search model
-			    	  searchModel.set('dataYear', true);
-			    	  //refresh the UI buttonset so it appears as checked
-			    	  $("#filter-year").buttonset("refresh");
-			      }
+			      viewRef.selectYearType();
 			      
-			      //Route to page 1
-				  viewRef.updatePageNumber(0);
-			      
-			      //Trigger a new search
-			      viewRef.triggerSearch();
-			    }
+				  //Route to page 1
+			      viewRef.updatePageNumber(0);
+				      
+				 //Trigger a new search
+				 viewRef.triggerSearch();
+			    } 
+			    
 			  });
 
+		},
+		
+		selectYearType : function(autoSelect){
+			
+		      var pubYearChecked  = $('#publish_year').prop('checked');
+			  var dataYearChecked = $('#data_year').prop('checked');
+		    
+			  // If neither the publish year or data coverage year are checked
+		      if((!pubYearChecked) && (!dataYearChecked)){
+		    	  
+		    	  //We want to check the data coverage year on the user's behalf
+		    	  $('#data_year').prop('checked', 'true');  
+			    	  
+		    	  //And update the search model
+		    	  searchModel.set('dataYear', true);
+		    	  
+		    	  //refresh the UI buttonset so it appears as checked/unchecked
+		    	  $("#filter-year").buttonset("refresh");
+		      }
 		},
 		
 		updateTextFilters : function(e){
@@ -681,7 +748,7 @@ define(['jquery',
 			//Close the autocomplete box
 			$('#' + category + '_input').autocomplete("close");
 				
-			//Get the current searchModel array
+			//Get the current searchModel array for this category
 			var filtersArray = _.clone(searchModel.get(category));
 				
 			//Check if this entry is a duplicate
@@ -691,7 +758,22 @@ define(['jquery',
 				}
 			})();
 			
-			if(duplicate){ return false; }
+			if(duplicate){ 	
+				//Display a quick message
+				if($('#duplicate-' + category + '-alert').length <= 0){					
+					$('#current-' + category + '-filters').prepend(
+							'<div class="alert alert-block" id="duplicate-' + category + '-alert">' +
+							'You are already using that filter' +
+							'</div>'						
+					);
+					
+					$('#duplicate-' + category + '-alert').delay(2000).fadeOut(500, function(){
+						this.remove();
+					});
+				}
+				
+				return false; 
+			}
 				
 			//Add the new entry to the array of current filters
 			filtersArray.push(term);
@@ -960,6 +1042,10 @@ define(['jquery',
 					
 					this.$('#resultspager').html("");
 				}
+				//Do not display the pagination if there is only one page
+				else if(pageCount == 1){
+					this.$('#resultspager').html("");
+				}
 				else{
 					var pages = new Array(pageCount);
 					
@@ -998,7 +1084,7 @@ define(['jquery',
 
 		// Next page of results
 		nextpage: function () {
-			this.removeAll();
+			this.loading();
 			appSearchResults.nextpage();
 			this.$resultsview.show();
 			this.updateStats();
@@ -1010,7 +1096,7 @@ define(['jquery',
 		
 		// Previous page of results
 		prevpage: function () {
-			this.removeAll();
+			this.loading();
 			appSearchResults.prevpage();
 			this.$resultsview.show();
 			this.updateStats();
@@ -1026,8 +1112,7 @@ define(['jquery',
 		},
 		
 		showPage: function(page) {
-			//Remove all the current search results
-			this.removeAll();
+			this.loading();
 			appSearchResults.toPage(page);
 			this.$resultsview.show();
 			this.updateStats();	
@@ -1039,7 +1124,7 @@ define(['jquery',
 			var viewRef = this;
 			
 			var facetQuery = "q=" + appSearchResults.currentquery +
-							 "&wt=json" + 
+							 "&wt=json" +
 							 "&rows=0" +
 							 "&facet=true" +
 							 "&facet.sort=count" +
@@ -1397,6 +1482,11 @@ define(['jquery',
 		},
 		
 		openMarker: function(e){
+			//Exit if maps are not in use
+			if((appModel.get('searchMode') != 'map') || (!gmaps)){
+				return false;
+			}
+			
 			//Clear the panning timeout
 			window.clearTimeout(this.centerTimeout);
 			
@@ -1428,6 +1518,11 @@ define(['jquery',
 		},
 		
 		closeMarker: function(e){
+			//Exit if maps are not in use
+			if((appModel.get('searchMode') != 'map') || (!gmaps)){
+				return false;
+			}
+			
 			var id = $(e.target).attr('data-id');
 			
 			//The mouseout event might be triggered by a nested element, so loop through the parents to find the id
@@ -1463,6 +1558,11 @@ define(['jquery',
 		},
 		
 		showMarkers: function() {
+			//Exit if maps are not in use
+			if((appModel.get('searchMode') != 'map') || (!gmaps)){
+				return false;
+			}
+			
 			var i = 1;
 			_.each(_.values(this.markers), function(marker) {
 				setTimeout(function() {
@@ -1473,6 +1573,11 @@ define(['jquery',
 		
 		// removes any existing markers that are not in the new search results
 		mergeMarkers: function() {
+			//Exit if maps are not in use
+			if((appModel.get('searchMode') != 'map') || (!gmaps)){
+				return false;
+			}
+			
 			var searchPids =
 			_.map(appSearchResults.models, function(element, index, list) {
 				return element.get("id");
@@ -1487,12 +1592,8 @@ define(['jquery',
 		},
 		
 		// Add a single SolrResult item to the list by creating a view for it, and
-		// appending its element to the `<ul>`.
+		// appending its element to the DOM.
 		addOne: function (result) {
-			
-			if(typeof $('#no-results-found') != 'undefined'){
-				$('#no-results-found').remove();
-			}
 			//Get the view and package service URL's
 			this.$view_service = appModel.get('viewServiceUrl');
 			this.$package_service = appModel.get('packageServiceUrl');
@@ -1505,7 +1606,7 @@ define(['jquery',
 			this.$results.append(view.render().el);
 			
 			// map it
-			if(gmaps){
+			if(gmaps && (appModel.get('searchMode') == 'map')){
 				this.addObjectMarker(result);	
 			}
 
@@ -1521,24 +1622,37 @@ define(['jquery',
 			
 			// do this first to indicate coming results
 			this.updateStats();
-			
+						
 			//reset the master bounds
 			this.masterBounds = null;
 			
+			//Clear the results list before we start adding new rows
+			this.$results.html('');
+			
+			//If there are no results, display so
+			var numFound = appSearchResults.models.length;
+			if (numFound == 0){
+				this.$results.html('<p id="no-results-found">No results found.</p>');
+			}
+
 			//Load the first 25 results first so the list has visible results while the rest load in the background
 			var min = 25;
-			min = Math.min(min, appSearchResults.models.length);
+			min = Math.min(min, numFound);
 			var i = 0;
 			for (i = 0; i < min; i++) {
 				var element = appSearchResults.models[i];
+
 				this.addOne(element);
 			};
+			
+			//Remove the loading class and styling
+			this.$results.removeClass('loading');
 			
 			//After the map is done loading, then load the rest of the results into the list
 			var viewRef = this;
 			var intervalId = setInterval(function() {
 				if (viewRef.ready) {
-					for (i = min; i < appSearchResults.models.length; i++) {
+					for (i = min; i < numFound; i++) {
 						var element = appSearchResults.models[i];
 						viewRef.addOne(element);
 					};
@@ -1550,9 +1664,6 @@ define(['jquery',
 					if(gmaps){
 						// clean out any old markers
 						viewRef.mergeMarkers();
-						
-						// show them if the are hidden
-						//viewRef.showMarkers();
 						
 						// show the clustered markers
 						var mcOptions = {
@@ -1594,11 +1705,10 @@ define(['jquery',
 
 		},
 		
-		// Remove all html for items in the **SearchResults** collection at once.
-		removeAll: function () {
-			console.log('Removing all the results from the list');
+		// Communicate that the page is loading
+		loading: function () {
 			$("#map-container").addClass("loading");
-			this.$results.html('');
+			this.$results.addClass("loading");
 		},
 		
 		//Toggles the collapseable filters sidebar and result list in the default theme 
@@ -1611,6 +1721,7 @@ define(['jquery',
 		
 		//Move the popover element up the page a bit if it runs off the bottom of the page
 		preventPopoverRunoff: function(e){
+			
 			//In map view only (because all elements are fixed and you can't scroll)
 			if(appModel.get('searchMode') == 'map'){
 				var viewportHeight = $('#map-container').outerHeight();
@@ -1640,6 +1751,7 @@ define(['jquery',
 					$('.popover').offset({top: newTopPosition});
 				}
 			}
+			
 		},
 		
 		toggleMapMode: function(){	
@@ -1652,6 +1764,8 @@ define(['jquery',
 			}
 			else if (appModel.get('searchMode') == 'list'){
 				appModel.set('searchMode', 'map');
+				this.renderMap();
+				this.showResults();
 			}
 		},
 		
@@ -1676,7 +1790,7 @@ define(['jquery',
 		},
 		
 		postRender: function() {
-			if(gmaps){
+			if((gmaps) && (appModel.get('searchMode') == 'map')){
 				console.log("Resizing the map");
 				var center = this.map.getCenter(); 
 				google.maps.event.trigger(this.map, 'resize'); 

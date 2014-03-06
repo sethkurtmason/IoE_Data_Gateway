@@ -1,4 +1,4 @@
-        <!-- <div class="result-selection span1"><input type="checkbox" <%= selected ? 'checked' : '' %>></div> -->
+
 <% 
 	if (typeof southBoundCoord != "undefined"){
 		print('<div class="result-row view-link pointer" data-id="'+id+'">');
@@ -70,7 +70,7 @@
         	</div>
 	       
 	   </div>      
-        <div class="result-citation span10">
+        <div class="result-citation span9">
               <span class="result-author">
               <% var count=0; _.each(origin, function(author) {
                    count++;
@@ -93,6 +93,15 @@
                <span class="result-title"> <% if (title) { print('<a class=\"view_link\" href=\"#view/', id, '\" pid=\"', id, '\">', title, '.</a> '); } %></span>
                <span class="result-id subtle"> <%- id %></span>
         </div>
+        
+		<div class="span1 stats">
+			<% 
+			
+			if (typeof read_count_i != "undefined"){
+				print('<span class="count">', read_count_i, '</span><label class="subtle">views</label>');
+			}
+			%>
+		</div>
 
 </div>
 <div class="clear"></div>
