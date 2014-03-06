@@ -6,6 +6,7 @@ var themeMap =
 		
 		// Resources (js) omit extension
 		//'views/DataCatalogView' : 'themes/' + theme + '/views/DataCatalogView',
+                'views/RegistryView' : 'themes/' + theme + '/views/RegistryView',
                 //'models/AppModel': 'themes/' + theme + 'models/AppModel',
 		//'routers/router' : 'themes/' + theme + '/routers/router',
 		
