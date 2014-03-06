@@ -247,11 +247,8 @@ define(['jquery', 'underscore', 'backbone', 'registry', 'bootstrap', 'text!templ
 				return false;
 			}
 
-			//formObj.username.value = "uid=" + formObj.elements["uid"].value + ",o="
-			//		+ formObj.elements["organization"].value
-			//		+ ",dc=montana,dc=edu";
-                        formObj.username.value = "uid=" + formObj.elements["uid"].value + ",o="
-					+ "rcg"
+			formObj.username.value = "uid=" + formObj.elements["uid"].value + ",o="
+					+ formObj.elements["organization"].value
 					+ ",dc=montana,dc=edu";
 			
 			// get the form data before replacing everything with the loading icon!
