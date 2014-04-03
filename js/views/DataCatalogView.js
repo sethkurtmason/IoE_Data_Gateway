@@ -139,7 +139,7 @@ define(['jquery',
 			this.updateYearRange(); 
 			
 			//Iterate through each search model text attribute and show UI filter for each
-			var categories = ['all', 'creator', 'taxon'];
+			var categories = ['all', 'creator', 'taxon', 'characteristic', 'standard'];
 			var thisTerm = null;
 			
 			for (var i=0; i<categories.length; i++){
@@ -205,13 +205,13 @@ define(['jquery',
 				var mapCenter = searchModel.get('map').center;
 			}
 			else{
-				var mapZoom = 7;
-				var mapCenter = new gmaps.LatLng(46.7, -109.6);
+				var mapZoom = 3;
+				var mapCenter = new gmaps.LatLng(-15.0, 0.0);
 			}
 			
 			var mapOptions = {
 			    zoom: mapZoom,
-				minZoom: 7,
+				minZoom: 3,
 			    center: mapCenter,
 				disableDefaultUI: true,
 			    zoomControl: true,
@@ -425,6 +425,40 @@ define(['jquery',
 				}
 				// TODO: surround with **?
 				filterQuery += "&fq=attribute:" + thisAttribute;
+				
+			}
+			
+			// characteristic
+			var thisCharacteristic = null;
+			var characteristic = searchModel.get('characteristic');
+			
+			for (var i=0; i < characteristic.length; i++){
+				
+				//Trim the spaces off
+				thisCharacteristic = characteristic[i].trim();
+				
+				// encode the semantic URI
+				thisCharacteristic = "%22" + encodeURIComponent(thisCharacteristic) + "%22";
+				
+				// add to the query
+				filterQuery += "&fq=characteristic_sm:" + thisCharacteristic;
+				
+			}
+			
+			// standard
+			var thisStandard = null;
+			var standard = searchModel.get('standard');
+			
+			for (var i=0; i < standard.length; i++){
+				
+				//Trim the spaces off
+				thisStandard = standard[i].trim();
+				
+				// encode the semantic URI
+				thisStandard = "%22" + encodeURIComponent(thisStandard) + "%22";
+				
+				// add to the query
+				filterQuery += "&fq=standard_sm:" + thisStandard;
 				
 			}
 			
@@ -922,8 +956,13 @@ define(['jquery',
 			}
 			
 							
+			// is it a semantic concept?
+			var termLabel = null;
+			if (term.indexOf("#") > 0) {
+				termLabel = term.substring(term.indexOf("#"));
+			}
 			//Add a filter node to the DOM
-			e.prepend(viewRef.currentFilterTemplate({filterTerm: term}));	
+			e.prepend(viewRef.currentFilterTemplate({filterTerm: term, termLabel: termLabel}));	
 				
 			return;
 		},
@@ -1140,6 +1179,8 @@ define(['jquery',
 							 "&facet.field=attributeName" +
 							 "&facet.field=attributeLabel" +
 							 "&facet.field=site" +
+							 "&facet.field=characteristic_sm" +
+							 "&facet.field=standard_sm" +
 							 "&facet.mincount=1" +
 							 "&facet.limit=-1";
 
@@ -1218,6 +1259,76 @@ define(['jquery',
 					select: function(event, ui) {
 						// set the text field
 						$('#attribute_input').val(ui.item.value);
+						// add to the filter immediately
+						viewRef.updateTextFilters(event);
+						// prevent default action
+						return false;
+					},
+					position: {
+						my: "left top",
+						at: "left bottom"				
+					}
+				});
+				
+				// suggest characteristics
+				var characteristicSuggestions = facetCounts.characteristic_sm;
+				var rankedCharacteristicSuggestions = new Array();
+				for (var i=0; i < characteristicSuggestions.length-1; i+=2) {
+					rankedCharacteristicSuggestions.push({value: characteristicSuggestions[i], label: characteristicSuggestions[i].substring(characteristicSuggestions[i].indexOf("#")) });
+				}
+				$('#characteristic_input').autocomplete({
+					source: function (request, response) {
+			            var term = $.ui.autocomplete.escapeRegex(request.term)
+			                , startsWithMatcher = new RegExp("^" + term, "i")
+			                , startsWith = $.grep(rankedCharacteristicSuggestions, function(value) {
+			                    return startsWithMatcher.test(value.label || value.value || value);
+			                })
+			                , containsMatcher = new RegExp(term, "i")
+			                , contains = $.grep(rankedCharacteristicSuggestions, function (value) {
+			                    return $.inArray(value, startsWith) < 0 && 
+			                        containsMatcher.test(value.label || value.value || value);
+			                });
+			            
+			            response(startsWith.concat(contains));
+			        },
+					select: function(event, ui) {
+						// set the text field
+						$('#characteristic_input').val(ui.item.value);
+						// add to the filter immediately
+						viewRef.updateTextFilters(event);
+						// prevent default action
+						return false;
+					},
+					position: {
+						my: "left top",
+						at: "left bottom"				
+					}
+				});
+				
+				// suggest standards
+				var standardSuggestions = facetCounts.standard_sm;
+				var rankedStandardSuggestions = new Array();
+				for (var i=0; i < standardSuggestions.length-1; i+=2) {
+					rankedStandardSuggestions.push({value: standardSuggestions[i], label: standardSuggestions[i].substring(standardSuggestions[i].indexOf("#")) });
+				}
+				$('#standard_input').autocomplete({
+					source: function (request, response) {
+			            var term = $.ui.autocomplete.escapeRegex(request.term)
+			                , startsWithMatcher = new RegExp("^" + term, "i")
+			                , startsWith = $.grep(rankedStandardSuggestions, function(value) {
+			                    return startsWithMatcher.test(value.label || value.value || value);
+			                })
+			                , containsMatcher = new RegExp(term, "i")
+			                , contains = $.grep(rankedStandardSuggestions, function (value) {
+			                    return $.inArray(value, startsWith) < 0 && 
+			                        containsMatcher.test(value.label || value.value || value);
+			                });
+			            
+			            response(startsWith.concat(contains));
+			        },
+					select: function(event, ui) {
+						// set the text field
+						$('#standard_input').val(ui.item.value);
 						// add to the filter immediately
 						viewRef.updateTextFilters(event);
 						// prevent default action
@@ -1730,25 +1841,27 @@ define(['jquery',
 				return false;
 			}
 
-			var offset = $('.popover').offset();
-			var popoverHeight = $('.popover').outerHeight();
-			var topPosition = offset.top;
-			
-			//If pixels are cut off the top of the page, readjust its vertical position
-			if(topPosition < 0){
-				$('.popover').offset({top: 10});
-			}
-			else{
-				//Else, let's check if it is cut off at the bottom
-				var totalHeight = topPosition + popoverHeight;
-	
-				var pixelsHidden = totalHeight - viewportHeight;
-		
-				var newTopPosition = topPosition - pixelsHidden - 40;
+			if($('.popover').length > 0){
+				var offset = $('.popover').offset();
+				var popoverHeight = $('.popover').outerHeight();
+				var topPosition = offset.top;
 				
-				//If pixels are cut off the bottom of the page, readjust its vertical position
-				if(pixelsHidden > 0){
-					$('.popover').offset({top: newTopPosition});
+				//If pixels are cut off the top of the page, readjust its vertical position
+				if(topPosition < 0){
+					$('.popover').offset({top: 10});
+				}
+				else{
+					//Else, let's check if it is cut off at the bottom
+					var totalHeight = topPosition + popoverHeight;
+		
+					var pixelsHidden = totalHeight - viewportHeight;
+			
+					var newTopPosition = topPosition - pixelsHidden - 40;
+					
+					//If pixels are cut off the bottom of the page, readjust its vertical position
+					if(pixelsHidden > 0){
+						$('.popover').offset({top: newTopPosition});
+					}
 				}
 			}
 			
