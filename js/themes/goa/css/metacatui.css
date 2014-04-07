@@ -674,14 +674,16 @@
 }
   
   /* The universal color for data */
-svg .data{
+svg .data,
+.fallback.data{
   	color: #2B8282;
   	stroke: #2B8282;
   	fill: #2B8282;
   }
   
   /* The universal color for metadata */
-svg .metadata{
+svg .metadata,
+.fallback.metadata{
   	color: #006dcc;
   	stroke: #006dcc;
   	fill: #006dcc;
@@ -694,7 +696,8 @@ svg .packages,
 	stroke: #5EB3D7;
 }
 
-svg .default{
+svg .default,
+.fallback.default{
 	fill: #CCCCCC;
 	stroke: #CCCCCC;
 	color: #CCCCCC;
@@ -887,6 +890,10 @@ svg .point:hover + .line-chart-label{
 	fill: #0E69A1;
 	font-size: 14px;
 	font-weight: bold;
+}
+
+.bar-chart .x.axis .tick text{
+	font-size: 11px;
 }
 
 #data-coverage-year-range{
@@ -1275,6 +1282,7 @@ svg .point:hover + .line-chart-label{
 	
 	.current-filter > i{
 		float: right;
+		display: inline;
 		margin-top: 2px;
 	}
 	

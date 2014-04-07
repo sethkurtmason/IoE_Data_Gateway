@@ -23,6 +23,7 @@ require.config({
   paths: {
     jquery: '../components/jquery',
     jqueryui: '../components/jquery-ui-1.10.3.custom.min',
+    jqueryform: '../components/jquery.form',
     underscore: '../components/underscore',
     backbone: '../components/backbone',
     bootstrap: '../components/bootstrap.min',
@@ -39,8 +40,12 @@ require.config({
     recaptcha: [recaptchaURL, 'scripts/placeholder'],
     gmapsAPI: gmapsURL,
 	markerClusterer: '../components/markerclustererplus_2.1.2',
-	d3: '../components/d3.v3.min'
-
+	//Have a null fallback for our d3 components for browsers that don't support SVG
+	d3: ['../components/d3.v3.min', null],
+	LineChart: ['views/LineChartView', null],
+	BarChart: ['views/BarChartView', null],
+	CircleBadge: ['views/CircleBadgeView', null],
+	DonutChart: ['views/DonutChartView', null]
   },
   shim: { /* used for libraries without native AMD support */
     underscore: {
@@ -88,6 +93,9 @@ require(['gmapsAPI'],
 	}
 );
 
+
+
+
 var appModel = appModel || {};
 var appView = appView || {};
 var uiRouter = uiRouter || {};
@@ -104,11 +112,10 @@ function(Bootstrap, AppView, AppModel) {
 	// initialize the application to get the index.html scaffolding in place
 	appModel = new AppModel({context: '/' + metacatContext});
 	appView = new AppView();
-
 	
 	/* Now require the rest of the libraries for the application */
-	require(['backbone', 'routers/router', 'collections/SolrResults', 'models/Search', 'models/RegistryModel', 'models/Stats', 'd3'],
-	function(Backbone, UIRouter, SolrResultList, Search, RegistryModel, Stats, d3) {
+	require(['backbone', 'routers/router', 'collections/SolrResults', 'models/Search', 'models/RegistryModel', 'models/Stats'],
+	function(Backbone, UIRouter, SolrResultList, Search, RegistryModel, Stats) {
 		'use strict';  
 	    		
 		appSearchResults = new SolrResultList([], {});
@@ -122,6 +129,7 @@ function(Bootstrap, AppView, AppModel) {
 		// Initialize routing and start Backbone.history()
 		uiRouter = new UIRouter();
 		Backbone.history.start();
+		
 	  
 	});
     	

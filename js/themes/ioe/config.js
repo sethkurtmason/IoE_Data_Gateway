@@ -18,6 +18,7 @@ var themeMap =
 		'templates/mainContent.html' : 'themes/' + theme + '/templates/mainContent.html',
 		'templates/altHeader.html' : 'themes/' + theme + '/templates/altHeader.html',
 		'templates/defaultHeader.html' : 'themes/' + theme + '/templates/defaultHeader.html',
-		'templates/about.html' : 'themes/' + theme + '/templates/about.html'
+		'templates/about.html' : 'themes/' + theme + '/templates/about.html',
+                'templates/developers.html' : 'themes/' + theme + '/templates/developers.html'
 		}
 };
