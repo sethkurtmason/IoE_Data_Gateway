@@ -30,6 +30,7 @@
         </p>
       </div>
     </div>
+    <br />
     <div class="row-fluid">
       <div class="text-left">
         <h2>
@@ -52,6 +53,7 @@
           </p>
       </div>
     </div>
+    <br />
     <div class="row-fluid">
       <div class="text-left">
         <h2>
@@ -97,8 +99,8 @@
         </p>
         <p>
           With your data and protocol files collected, you're ready to use the
-          software tools above to create metadata files in the Ecological
-          Metadata Language (EML). If your project involves large numbers of
+          software tools above to create metadata files in the <a href="#external//emlparser/docs/index.html">Ecological
+          Metadata Language (EML)</a>. If your project involves large numbers of
           files (hundreds to thousands), you may want to automate the creation
           of your metadata. This is certainly possible, and has been done in
           programs like Matlab, R, etc. Send a note to <a
@@ -141,6 +143,23 @@
           or <a href="mailto:help@data.rcg.montana.edu">IoE staff </a>
           and we can further help you or your lab in effectively managing data and metadata.
         </p>
+        <div class="row-fluid">
+			<div class="text-left">
+				<h3>
+				 	<a name="eml"></a>
+					<i class="glyphicons-icon notes"></i>
+					EML - Ecological Metadata Language
+				</h3>
+				<p class="lead">A metadata standard developed for the earth, environmental and ecological sciences.</p>
+				<p>Based on prior work done by the Ecological Society of America and associated efforts, 
+				    EML is implemented as a series of XML document types that can by used in a modular and extensible manner to document scientific research data.
+				</p>
+				<p>	
+					<a href="#external//eml-2.1.1/docs/index.html">More about EML <i class="icon-circle-arrow-right"></i></a>
+				</p>
+
+			</div>
+		</div>
         <h3>
           <a name="assigning-dois"></a>
           Publishing data with a DOI
@@ -149,7 +168,7 @@
           Digital Object Identifiers (DOIs) provide a long-term
           identifier for a data package that can be used to cite usage
           of the data and to provide a stable mechanism to find the
-          current location(s) for the data.  Because the KNB creates
+          current location(s) for the data.  Because the IoE Data Gateway creates
           replica copies of data packages via <a
           href="http://dataone.org">DataONE</a>, it is important that
           the identifier for the data set not be tied to a specific
@@ -160,8 +179,8 @@
           efficient to access.
         </p>
         <p>
-          To assign a DOI using the KNB requires that you have the
-          proper permissions on the data set.  Simply log in to the KNB
+          To assign a DOI using the Ioe Data Gateway requires that you have the
+          proper permissions on the data set.  Simply log in to the Gateway
           web interface with your username and password, and then search
           for your data package.  If you are the owner or have been
           granted management permissions, you will see a 'Publish'
@@ -175,6 +194,7 @@
         </p>
       </div>
     </div>
+    <br />
     <div class="row-fluid">
       <div class="text-left">
         <h2>
@@ -182,24 +202,223 @@
           <i class="glyphicons-icon cogwheels"></i>
           Advanced Users
         </h2>
-        <h3>
-          <a name="restful-api"></a>
-          RESTful API
-        </h3>
+        <h3 id="api">A RESTful API for accessing and contributing data.</h3>
         <p>
-          The IoE Data Gateway supports the DataONE REST API to provide a
-          common web service interface for users and developers to access
-          and contribute data and metadata. This allows any software
-          tool that supports the <a href="http://mule1.dataone.org/ArchitectureDocs-current/apis/">
-          DataONE API</a> (such as the ONE<i>R</i> <a href="http://releases.dataone.org/online/dataone_r/">DataONE
-          R client</a>) to enable seamless interaction with IoE Data Gateway objects.
-          DataONE maintains the full technical documentation on the <a href=" ">
-          API</a>. All API access is over HTTPS, and accessed via the
-          <code>https://data.rcg.montana.edu/metacat/d1/mn/v1/</code> endpoint. The relative path
-          prefix <code>mn/v1/</code> indicates that we are currently using version 1 of the DataONE
-          API for Member Nodes. 
+                The IoE Data Gateway supports the <a
+                        href="http://releases.dataone.org/online/api-documentation-v1.2/apis/index.html"
+                        target="_external">DataONE REST API</a> (also see the <a
+                        href="http://releases.dataone.org/online/api-documentation-v1.2/apis/index.html"
+                        target="_external">dev version</a>) to provide a common web
+                service interface for users and developers to access and
+                contribute data and metadata to the IoE Data Gateway. This allows any software
+                tool that supports the DataONE API (ONE<i>R</i> DataONE R
+		client) to also be able to seamlessly interact with IoE data.
+                While DataONE maintains the full technical documentation on the
+                API, here is a brief overview for commonly accessed services.
         </p>
+        <section id="summary">
+                <h3>Summary</h3>
+                <p>
+                        All API access is over HTTPS, and accessed via the
+                        <code>https://data.rcg.montana.edu/catalog/d1/mn/v1/</code>
+                        endpoint. The relative path prefix
+                        <code>/v1/</code>
+                        indicates that we are currently using version 1 of the DataONE
+                        API. 						    
+                <blockquote><i class="glyphicons-icon warning_sign"></i>
+                <p class="text-warning">The examples below show calls to the production IoE site 
+                (<code>http://data.rcg.montana.edu</code>), but developers
+            should not create test data on the production server.  Instead, they can use
+            a test Metacat repository to explore the API 
+            (e.g., <code>https://mn-demo-5.test.dataone.org/knb/d1/mn/v1/</code>).
+            </p></blockquote>
+                        
+                </p>
+                <p>DataONE distinguishes three classes of objects that it
+                        will store and manage: data objects, science metadata objects,
+                        and resource map documents. Each of these are uniquely
+                        identifiable by their persistent identifier (PID), and each has
+                        associated System Metadata that describes the object type, size,
+                        access rules, etc.</p>
+                <p>
+                        Data objects are treated as opaque blobs, and are retrievable
+                        via the get method given a persistent identifier (PID). Science
+                        metadata objects are metadata documents such as EML, FGDC,
+                        ISO19115 and so forth that provide metadata describing some data
+                        object(s). These are represented in XML according to their
+                        respective schema. Resource Maps are OAI-ORE documents that
+                        describe the aggregations of data and metadata into
+                        <code>data packages</code>
+                        .
+                </p>
+                <br />
+                <h4>Quick Reference</h4>
+                <table class="endpoints">
+                        <tbody>
+                                <tr>
+                                        <th>URL</th>
+                                        <th>Method</th>
+                                        <th>Example</th>
+                                </tr>
+                                <tr>
+                                        <td><code>/object</code></td>
+                                        <td>GET</td>
+                                        <td><a href="#listObjects">List Objects</a></td>
+                                </tr>
+                                <tr>
+                                        <td><code>/object/&lt;pid&gt;</code></td>
+                                        <td>GET</td>
+                                        <td><a href="#get">Get an Object</a></td>
+                                </tr>
+                                <tr>
+                                        <td><code>/object</code></td>
+                                        <td>POST</td>
+                                        <td><a href="#create">Create an Object</a></td>
+                                </tr>
+                                <tr>
+                                        <td><code>/object/&lt;pid&gt;</code></td>
+                                        <td>PUT</td>
+                                        <td><a href="#update">Update an Object</a></td>
+                                </tr>
+                                <tr>
+                                        <td><code>/object/&lt;pid&gt;</code></td>
+                                        <td>DELETE</td>
+                                        <td><a href="#delete">Delete an Object</a></td>
+                                </tr>
+                                <tr>
+                                        <td><code>/archive/&lt;pid&gt;</code></td>
+                                        <td>PUT</td>
+                                        <td><a href="#archive">Archive an Object</a></td>
+                                </tr>
+                                <tr>
+                                        <td><code>/meta/&lt;pid&gt;</code></td>
+                                        <td>GET</td>
+                                        <td><a href="#getSystemMetadata">Get System Metadata for an Object</a></td>
+                                </tr>
+                                <tr>
+                                        <td><code>/generate</code></td>
+                                        <td>POST</td>
+                                        <td><a href="#generate">Generate an Identifier</a></td>
+                                </tr>
+                        </tbody>
+                </table>
+        </section>
+        <br />
+        <section id="Calling Services">
+                <h4 id="requestFormat">Request Format</h4>
+                <ul>
+                        <li>GET, HEAD, and DELETE requests only pass parameters as
+                                part of the URL. The parameter values are converted to UTF-8
+                                Strings and appropriately escaped for incorporating into the
+                                URL.</li>
+                        <li>Message bodies (e.g. for POST and PUT requests) are
+                                encoded using MIME Multipart, mixed (RFC2046). All information
+                                for creating the new object or resource is transmitted in the
+                                message body, which is encoded as a MIME multipart/mixed
+                                message. We use two types of content in MIME multipart/mixed
+                                messages: parameters and files. Parameters are to be used for
+                                all simple types (such as a String value). Files are to be used
+                                for all complex types (such as an XML structure) and for octet
+                                streams.</li>
+                </ul>
+                <br />
+                <h4 id="responseFormat">Response Format</h4>
+                <p>Version 1.0 of the DataONE services only support XML serialization, and 
+                this format MUST be used when communicating with the IoE Data Gateway.
+                Request and response documents MUST also be encoded using UTF-8.</p>
+                <br />
+                <h4 id="auth">Authentication and Authorization</h4>
+                <p>Authentication is handled using SSL with client-side certificates 
+                (in X.509 format).  Users can 
+                <a href="https://cilogon.org/?skin=DataONE" target="_external">log into CILogon</a> 
+                to download a certificate, 
+                which can then be included in requests.  The Subject of the provided certificate
+                will be used by the IoE Data Gateway to determine all access control decisions for accessing,
+                creating, updating, archiving, and deleting objects.  If a client-side certificate
+                is not provided, the user will be considered an anonymous <code>public</code> user
+                and will only be able to access public content.   
+                </p>
+                <p>Each language or submission tool will have different mechanisms for setting the 
+                client certificate in the SSL session.  For example, for Curl the certificate filename 
+                is passed in on the commandline: <code>curl -X POST --cert /tmp/x509up_u502 ...</code>.
+                </p>
+        </section>
+        <br />
+        <section id="examples">
+            
+                <h4 id="listObjects">List Objects</h4>
+                <code class="code_example">
+curl -X GET -H "Accept: text/xml" "http://data.rcg.montana.edu/catalog/d1/mn/v1/object?start=0&amp;count=100"
+                </code>
+                <br />
+                <h4 id="get">Get an Object</h4>
+                <code class="code_example">
+curl -X GET \
+-H "Accept: text/xml" \
+"http://data.rcg.montana.edu/catalog/d1/mn/v1/object/doi:10.5063/F1HT2M7Q"
+                </code>
+                <br />
+                <h4 id="create">Create an Object</h4>
+                <code class="code_example">
+curl -X POST \
+--cert /tmp/x509up_u501 \
+-H "Charset: utf-8" \
+-H "Content-Type: multipart/mixed; boundary=----------4A2D135C-52CC-017FC-B269-B711ED211576_$" \
+-H "Accept: text/xml" \
+-F pid=urn:uuid:56eafcec-8b0a-11e3-a5e8-00334b2a1a0a \
+-F object=@mydatafile.csv \
+-F sysmeta=@mysystemmetadata.xml \
+"http://data.rcg.montana.edu/catalog/d1/mn/v1/object"
+                </code>
+                <br />
+                <h4 id="update">Update an Object</h4>
+                <code class="code_example">
+curl -X PUT \
+--cert /tmp/x509up_u501 \
+-H "Charset: utf-8" \
+-H "Content-Type: multipart/mixed; boundary=----------4A2D135C-52CC-017FC-B269-B711ED211576_$" \
+-H "Accept: text/xml" \
+-F newPid=urn:uuid:21865616-8b0d-11e3-a31f-00334b2a1a0a \
+-F object=@mydatafile.csv \
+-F sysmeta=@mysystemmetadata.xml \
+"http://data.rcg.montana.edu/catalog/d1/mn/v1/object/urn:uuid:56eafcec-8b0a-11e3-a5e8-00334b2a1a0a"
+                </code>
+                <br />
+                <h4 id="delete">Delete an Object</h4>
+                <code class="code_example">
+curl -X DELETE \
+--cert /tmp/x509up_u501 \
+-H "Accept: text/xml" \
+"http://data.rcg.montana.edu/catalog/d1/mn/v1/object/urn:uuid:56eafcec-8b0a-11e3-a5e8-00334b2a1a0a"
+                </code>
+                <br />
+                <h4 id="archive">Archive an Object</h4>
+                <code class="code_example">
+curl -X PUT \
+--cert /tmp/x509up_u501 \
+-H "Accept: text/xml" \
+"http://data.rcg.montana.edu/catalog/d1/mn/v1/archive/urn:uuid:56eafcec-8b0a-11e3-a5e8-00334b2a1a0a"
+                </code>
+                <br />
+                <h4 id="getSystemMetadata">Get System Metadata for an Object</h4>
+                <code class="code_example">
+curl -X GET \
+-H "Accept: text/xml" \
+"http://data.rcg.montana.edu/catalog/d1/mn/v1/meta/urn:uuid:56eafcec-8b0a-11e3-a5e8-00334b2a1a0a"
+                </code>
+                <br />
+                <h4 id="archive">Generate an identifier</h4>
+                <code class="code_example">
+curl -X POST \
+--cert /tmp/x509up_u501 \
+-H "Accept: text/xml" \
+-F scheme=UUID \
+"http://data.rcg.montana.edu/catalog/d1/mn/v1/generate"
+                </code>
+        </section>
+        <br />
         <div class="row-fluid">
+            <h3 id="clientLibraries">Client Libraries</h3>
             <div class="text-left">
                 <p> <i class="halflings-icon wrench"></i>  DataONE <a href="http://mule1.dataone.org/OperationDocs/DataONE-Java-Client-Library-HowTo.html">Java Client Library</a></p>
                 <p> <i class="halflings-icon wrench"></i>  DataONE <a href="https://pypi.python.org/pypi/dataone.libclient">Python Client Library</a></p>
@@ -208,6 +427,7 @@
         </div>
       </div>
     </div>
+    <br />
     <div class="row-fluid">
       <div class="text-left">
         <h2>
