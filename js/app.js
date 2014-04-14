@@ -5,7 +5,7 @@
 /** NOTE: The theme name and themeMap are specified in the loader.js file **/
 
 console.log("Using theme: " + theme);
-console.log("Using themeMap: " + themeMap);
+//console.log("Using themeMap: " + themeMap);
 console.log("Using metacatContext: " + metacatContext);
 
 var recaptchaURL = 'https://www.google.com/recaptcha/api/js/recaptcha_ajax';
@@ -19,7 +19,7 @@ if (mapKey){
 require.config({
   baseUrl: 'js/',
   waitSeconds: 180, //wait 3 minutes before throwing a timeout error
-  map: themeMap,
+  //map: themeMap,
   paths: {
     jquery: '../components/jquery',
     jqueryui: '../components/jquery-ui-1.10.3.custom.min',
