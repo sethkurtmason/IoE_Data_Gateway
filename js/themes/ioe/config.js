@@ -19,6 +19,6 @@ var themeMap =
 		'templates/altHeader.html' : 'themes/' + theme + '/templates/altHeader.html',
 		'templates/defaultHeader.html' : 'themes/' + theme + '/templates/defaultHeader.html',
 		'templates/about.html' : 'themes/' + theme + '/templates/about.html',
-                'templates/developers.html' : 'themes/' + theme + '/templates/developers.html'
+                'templates/ldapAccountTools.html' : 'themes/' + theme + '/templates/ldapAccountTools.html'
 		}
 };

@@ -158,6 +158,12 @@ Bold 700 Italic
       margin: 35px auto auto auto;
     }
     
+    .code_example{
+        width: inherit;
+        overflow: scroll;
+        margin-bottom: 10px;
+    }
+    
 /* FORM/INPUT CUSTOMIZATIONS
 -------------------------------------------------- */ 
 	.controls-well {
@@ -3121,7 +3127,7 @@ svg .point:hover + .line-chart-label{
  
 
 
-/* -----  CSS FOR emlparser -----
+/* -----  CSS FOR emlspec -----
 ------------------------------------------------ */
 
  *	  Color Scheme:

@@ -256,8 +256,8 @@
                 <table class="endpoints">
                         <tbody>
                                 <tr>
-                                        <th>URL</th>
-                                        <th>Method</th>
+                                        <th style="width:150px">URL</th>
+                                        <th style="width:100px">Method</th>
                                         <th>Example</th>
                                 </tr>
                                 <tr>
@@ -347,19 +347,19 @@
         <section id="examples">
             
                 <h4 id="listObjects">List Objects</h4>
-                <code class="code_example">
+                <div class="code_example"><code>
 curl -X GET -H "Accept: text/xml" "http://data.rcg.montana.edu/catalog/d1/mn/v1/object?start=0&amp;count=100"
-                </code>
+                </code></div>
                 <br />
                 <h4 id="get">Get an Object</h4>
-                <code class="code_example">
+                <div class="code_example"><code>
 curl -X GET \
 -H "Accept: text/xml" \
 "http://data.rcg.montana.edu/catalog/d1/mn/v1/object/doi:10.5063/F1HT2M7Q"
-                </code>
+                </code></div>
                 <br />
                 <h4 id="create">Create an Object</h4>
-                <code class="code_example">
+                <div class="code_example"><code>
 curl -X POST \
 --cert /tmp/x509up_u501 \
 -H "Charset: utf-8" \
@@ -369,10 +369,10 @@ curl -X POST \
 -F object=@mydatafile.csv \
 -F sysmeta=@mysystemmetadata.xml \
 "http://data.rcg.montana.edu/catalog/d1/mn/v1/object"
-                </code>
+                </code></div>
                 <br />
                 <h4 id="update">Update an Object</h4>
-                <code class="code_example">
+                <div class="code_example"><code>
 curl -X PUT \
 --cert /tmp/x509up_u501 \
 -H "Charset: utf-8" \
@@ -382,39 +382,39 @@ curl -X PUT \
 -F object=@mydatafile.csv \
 -F sysmeta=@mysystemmetadata.xml \
 "http://data.rcg.montana.edu/catalog/d1/mn/v1/object/urn:uuid:56eafcec-8b0a-11e3-a5e8-00334b2a1a0a"
-                </code>
+                </code></div>
                 <br />
                 <h4 id="delete">Delete an Object</h4>
-                <code class="code_example">
+                <div class="code_example"><code>
 curl -X DELETE \
 --cert /tmp/x509up_u501 \
 -H "Accept: text/xml" \
 "http://data.rcg.montana.edu/catalog/d1/mn/v1/object/urn:uuid:56eafcec-8b0a-11e3-a5e8-00334b2a1a0a"
-                </code>
+                </code></div>
                 <br />
                 <h4 id="archive">Archive an Object</h4>
-                <code class="code_example">
+                <div class="code_example"><code>
 curl -X PUT \
 --cert /tmp/x509up_u501 \
 -H "Accept: text/xml" \
 "http://data.rcg.montana.edu/catalog/d1/mn/v1/archive/urn:uuid:56eafcec-8b0a-11e3-a5e8-00334b2a1a0a"
-                </code>
+                </code></div>
                 <br />
                 <h4 id="getSystemMetadata">Get System Metadata for an Object</h4>
-                <code class="code_example">
+                <div class="code_example"><code>
 curl -X GET \
 -H "Accept: text/xml" \
 "http://data.rcg.montana.edu/catalog/d1/mn/v1/meta/urn:uuid:56eafcec-8b0a-11e3-a5e8-00334b2a1a0a"
-                </code>
+                </code></div>
                 <br />
                 <h4 id="archive">Generate an identifier</h4>
-                <code class="code_example">
+                <div class="code_example"><code>
 curl -X POST \
 --cert /tmp/x509up_u501 \
 -H "Accept: text/xml" \
 -F scheme=UUID \
 "http://data.rcg.montana.edu/catalog/d1/mn/v1/generate"
-                </code>
+                </code></div>
         </section>
         <br />
         <div class="row-fluid">
@@ -447,10 +447,10 @@ curl -X POST \
           href="http://www.bitlaw.com/copyright/database.html">Data
           and facts themselves are not covered under copyright</a>
           in the US and most countries, since facts in and of
-          themselves are not eligible for copyright. That said,
+          themselves are not eligible for copyright. However,
           some associated metadata and some particular compilations
-          of data could potentially be covered by copyright in
-          some jurisdictions. Thus, by uploading content, you
+          of data may be covered by copyright in
+          some jurisdictions. By uploading content, you
           grant this repository and Montana University System
           (MUS) all rights needed to copy, store,
           redistribute, and share data, metadata, and any other
@@ -458,7 +458,7 @@ curl -X POST \
           By marking content as publicly available, you grant this 
           repository, MUS, and any other users the right to copy the
           content and redistribute it to the public without restriction
-          under the terms of <a href="http://creativecommons.org/licenses/by/4.0/legalcode target="_blank">CC-BY</a>.
+          under the terms of <a href="http://creativecommons.org/licenses/by/4.0/ target="_blank">CC-BY</a>.
         </p>
       </div>
     </div>
