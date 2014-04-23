@@ -212,7 +212,7 @@ define(['jquery',
 			}
 			else{
 				var mapZoom = 5;
-				var mapCenter = new gmaps.LatLng(42.0, -111.0);
+				var mapCenter = new gmaps.LatLng(40.0, -100.0);
 			}
 			
 			var mapOptions = {
