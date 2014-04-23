@@ -1,0 +1,38 @@
+<form class="form-horizontal">
+	<div class="well citation">
+		<div class="row-fluid">
+			<div>
+				<% var count=0; _.each(creator, function(author) {
+                   count++;
+                   if (count > 1) {
+                       print(", ")
+             }
+                   if (count > 1 && count == creator.length) {
+                       print("and ")
+             }
+                   print(author)
+                   if (count == creator.length) {
+                       print(". ")
+             }
+               }) %>
+              <span class="result-pubdate"> 
+               <%
+               console.log(pubDate, dateUploaded);
+                if(pubDate) { 
+                   var pubDateFormatted = moment(pubDate).format('YYYY');
+                   if(!isNaN(pubDateFormatted)) print(pubDateFormatted, '. ');
+                }
+                if(dateUploaded && isNaN(pubDateFormatted)){
+                	var dateUploadedFormatted = moment(dateUploaded).format('YYYY');
+                    if(!isNaN(dateUploadedFormatted)) print(dateUploadedFormatted, '. ');
+               } 
+               %></span> 
+				<strong><%=title%></strong>
+				(<%=id%>)
+			</div>
+		</div>
+	</div>
+	<div id="downloadContents">
+	</div>
+	<%=metadata%>
+</form>

@@ -3,6 +3,8 @@ define(['jquery',
 		'underscore', 
 		'backbone',
 		'gmaps',
+		'fancybox',
+		'views/MetadataIndexView',
 		'text!templates/publishDOI.html',
 		'text!templates/newerVersion.html',
 		'text!templates/loading.html',
@@ -11,11 +13,13 @@ define(['jquery',
 		'text!templates/alert.html',
 		'text!templates/editMetadata.html'
 		], 				
-	function($, _, Backbone, gmaps, PublishDoiTemplate, VersionTemplate, LoadingTemplate, UsageTemplate, DownloadContentsTemplate, AlertTemplate, EditMetadataTemplate) {
+	function($, _, Backbone, gmaps, fancybox, MetadataIndex, PublishDoiTemplate, VersionTemplate, LoadingTemplate, UsageTemplate, DownloadContentsTemplate, AlertTemplate, EditMetadataTemplate) {
 	'use strict';
 
 	
 	var MetadataView = Backbone.View.extend({
+		
+		subviews: {},
 
 		el: '#Content',
 		
@@ -45,7 +49,6 @@ define(['jquery',
 		},
 		
 		initialize: function () {
-			
 		},
 				
 		// Render the main metadata view
@@ -57,63 +60,59 @@ define(['jquery',
 			// get the pid to render
 			var pid = appModel.get('pid');
 			
-			// load the document view from the server
-			var endpoint = appModel.get('viewServiceUrl') + pid + ' #Metadata';
-			console.log('calling view endpoint: ' + endpoint);
-
-			var viewRef = this;
-			this.$el.load(endpoint,
-					function(response, status, xhr) {
-						if(status=="error"){
-							var msg = response;
-							
-							//If we get a 404, it is most likely because the ID is wrong
-							if(xhr.status == 404){
-								msg = "<h4>That ID doesn't exist</h4>" + response;
+			//URL encode the pid
+			this.encodedPid = encodeURIComponent(pid);
+			
+			//Check for a view service in this appModel
+			if((appModel.get('viewServiceUrl') !== undefined) && (appModel.get('viewServiceUrl'))) var endpoint = appModel.get('viewServiceUrl') + pid + ' #Metadata';
+					
+			if(endpoint && (endpoint !== undefined)){
+				// load the document view from the server
+				console.log('calling view endpoint: ' + endpoint);
+	
+				var viewRef = this;
+				this.$el.load(endpoint,
+						function(response, status, xhr) {
+							if(status=="error"){
+								//Our fallback is to show the metadata details from the Solr index
+								viewRef.renderMetadataFromIndex();
 							}
-							
-							viewRef.$el.html(viewRef.alertTemplate({
-								msg: msg,
-								classes: "alert-error",
-								includeEmail: true
-							}));
-						}
-						else{
-							viewRef.insertResourceMapContents(pid);
-							if(gmaps){ 
-								viewRef.insertSpatialCoverageMap();
+							else{
+								//HTML was successfully loaded from a view service
+															
+								//Find the taxonomic range and give it a class for styling
+								$('#Metadata').find('h4:contains("Taxonomic Range")').parent().addClass('taxonomic-range');
+								
+								viewRef.$el.fadeIn("slow");
+								
+								viewRef.insertResourceMapContents(appModel.get('pid'));
+								if(gmaps) viewRef.insertSpatialCoverageMap();
 							}
-							
-							if(uiRouter.lastRoute() == "data"){
-								$('#Metadata').prepend('<a href="#data" title="Back"><i class="icon-angle-left"></i> Back to search</a>');
-							}
-							
-							//Find the taxonomic range and give it a class for styling
-							$('#Metadata').find('h4:contains("Taxonomic Range")').parent().addClass('taxonomic-range');
-							
-							console.log('Loaded metadata, now fading in MetadataView');
-							viewRef.$el.fadeIn("slow");
-						}
-					});
+												
+						});
+			}
+			else this.renderMetadataFromIndex();
 			
 			return this;
 		},
 		
+		renderMetadataFromIndex: function(){
+			this.subviews.metadataFromIndex = new MetadataIndex({ 
+					pid: appModel.get('pid'), 
+					parentView: this 
+					});
+			this.$el.append(this.subviews.metadataFromIndex.render().el);
+		},
+		
+		insertBackLink: function(){
+			if(uiRouter.lastRoute() == "data") {
+				var insertInto = this.$el.children()[0] || this.el;
+				$(insertInto).prepend('<a href="#data" title="Back"><i class="icon-angle-left"></i> Back to search</a>');
+			}
+		},
+		
 		// this will insert the ORE package download link if available
 		insertResourceMapContents: function(pid) {
-			//Keep a map of resource map ID <-> objects in that resource map 
-			var packages = new Array();
-			//Keep a list of all resource map objects
-			var maps = new Array();
-			var objects = new Array();
-
-			var resourceMapQuery = "";
-			
-			// look up the resourceMapId[s]
-			var queryServiceUrl = appModel.get('queryServiceUrl');
-			var packageServiceUrl = appModel.get('packageServiceUrl');
-			var objectServiceUrl = appModel.get('objectServiceUrl');
-			
 			var viewRef = this;
 
 			//*** Find the DOM element to append the HTML to. We want to create a new div underneath the first well with the citation
@@ -132,14 +131,41 @@ define(['jquery',
 				}
 			});
 			
+			if(!this.citationEl){
+				//Otherwise, just find the first element with a citation class - useful for when we display the metadata from the indeed fields
+				viewRef.citationEl = viewRef.$('.citation')[0];
+			}
+			
+			//Keep a map of resource map ID <-> objects in that resource map 
+			var packages = new Array();
+			//Keep a list of all resource map objects
+			var maps = new Array();
+			var objects = new Array();
+
+			var resourceMapQuery = "";
+			
+			// Grab all of our URLs
+			var queryServiceUrl = appModel.get('queryServiceUrl');
+			var packageServiceUrl = appModel.get('packageServiceUrl') || appModel.get('objectServiceUrl');
+			var objectServiceUrl = appModel.get('objectServiceUrl');
+			//Does a route to an EML info page exist?
+			var routes = Object.keys(uiRouter.routes),
+				EMLRoute = false;
+			for(var i=0; i<routes.length; i++){
+				if(routes[i].indexOf("tools") > -1){
+					EMLRoute = true;
+					i = routes.length;
+				}
+			}
+						
 			//*** Find each resource map that this metadata is a part of 
 			// surround pid value in "" so that doi characters do not affect solr query
-			var query = 'fl=resourceMap,read_count_i,size,formatType,formatId,id&wt=json&q=formatType:METADATA+-obsoletedBy:*+id:%22' + pid + '%22';
+			var query = 'fl=resourceMap,read_count_i,size,formatType,formatId,id&wt=json&q=formatType:METADATA+-obsoletedBy:*+id:"' + pid + '"';
 
 			$.get(queryServiceUrl + query, function(data, textStatus, xhr) {
 				
 				//Insert the container div for the download contents
-				$(viewRef.citationEl).after("<div id='downloadContents'></div>");
+				if ($('#downloadContents').length == 0) $(viewRef.citationEl).after("<div id='downloadContents'></div>");
 						
 				var resourceMap = data.response.docs[0].resourceMap;
 						
@@ -149,11 +175,11 @@ define(['jquery',
 					//Add to our list and map of resource maps if there is at least one
 					_.each(resourceMap, function(resourceMapID){
 						packages[resourceMapID] = new Array();
-						resourceMapQuery += 'resourceMap:%22' + resourceMapID + '%22%20OR%20id:%22' + resourceMapID + '%22%20OR%20';
+						resourceMapQuery += 'resourceMap:"' + encodeURIComponent(resourceMapID) + '"%20OR%20id:"' + encodeURIComponent(resourceMapID) + '"%20OR%20';
 					});
 
 					//*** Find all the files that are a part of those resource maps
-					var query = 'fl=resourceMap,read_count_i,size,formatType,formatId,id&wt=json&q=-obsoletedBy:*+%28' + resourceMapQuery + 'id:%22' + pid + '%22%29';
+					var query = 'fl=resourceMap,read_count_i,size,formatType,formatId,id&wt=json&q=-obsoletedBy:*+%28' + resourceMapQuery + 'id:"' + encodeURIComponent(pid) + '"%29';
 					$.get(queryServiceUrl + query, function(moreData, textStatus, xhr) {
 								
 						//Keep track of each object pid
@@ -169,7 +195,7 @@ define(['jquery',
 								pids.push(doc.id);
 							}
 						});
-						
+												
 						//Replace Ecogrid Links with DataONE API links
 						viewRef.replaceEcoGridLinks(pids);
 										
@@ -189,14 +215,15 @@ define(['jquery',
 								objects: packages[thisMap.id],
 								resourceMap: thisMap,
 								package_service: packageServiceUrl,
-								object_service: objectServiceUrl
+								object_service: objectServiceUrl,
+								EMLRoute: EMLRoute
 							}));	
 						}); 
 						
 						//Move the download button to our download content list area
 					    $("#downloadPackage").detach();
 					    
-					}).error(function(){
+					}, "json").error(function(){
 						console.warn(reponse);
 					});
 				}	
@@ -206,7 +233,8 @@ define(['jquery',
 						objects: data.response.docs,
 						resourceMap: null,
 						package_service: packageServiceUrl,
-						object_service: objectServiceUrl
+						object_service: objectServiceUrl,
+						EMLRoute: EMLRoute
 					}));
 					
 					//Move the download button to our download content list area
@@ -216,27 +244,34 @@ define(['jquery',
 				//Initialize any popovers
 				$('.popover-this').popover();
 						
-			}).error(function(){
+			}, "json").error(function(){
 				console.warn(repsonse);
 			});
 					
 			// is this the latest version? (includes DOI link when needed)
 			viewRef.showLatestVersion(pid);		
 		},
-		
-		insertSpatialCoverageMap: function(){
-			var findCoordinates = this.$el.find('h4:contains("Geographic Region")').each(function(){
-				var parentEl = $(this).parent();
 				
-				var coordinates = new Array();
-				var directions = new Array('North', 'South', 'East', 'West');
+		insertSpatialCoverageMap: function(coordinates){
+			
+			var georegionEls = this.$el.find('h4:contains("Geographic Region")');
+			for(var i=0; i<georegionEls.length; i++){
+				var parentEl = $(georegionEls[i]).parent();
 				
-				_.each(directions, function(direction){
-					var labelEl = $(parentEl).find('label:contains("' + direction + '")');
-					var coordinate = $(labelEl).next().html();
-					coordinate = coordinate.substring(0, coordinate.indexOf("&nbsp;"));
-					coordinates.push(coordinate);
-				});
+				if(coordinates === undefined){
+					var coordinates = new Array();
+					var directions = new Array('North', 'South', 'East', 'West');
+					
+					_.each(directions, function(direction){
+						var labelEl = $(parentEl).find('label:contains("' + direction + '")');
+						if(labelEl){
+							var coordinate = $(labelEl).next().html();
+							console.log('coordinate: ' + coordinate);
+							coordinate = coordinate.substring(0, coordinate.indexOf("&nbsp;"));
+							coordinates.push(coordinate);	
+						}
+					});
+				}
 				
 				//Extract the coordinates
 				var n = coordinates[0];
@@ -265,11 +300,14 @@ define(['jquery',
 							  "&visible=" + latLngSW.lat()+","+latLngSW.lng()+"|"+latLngNW.lat()+","+latLngNW.lng()+"|"+latLngNE.lat()+","+latLngNE.lng()+"|"+latLngSE.lat()+","+latLngSE.lng()+"|"+latLngSW.lat()+","+latLngSW.lng()+
 							  "&sensor=false" +
 							  "&key=" + mapKey + "'/>";
-
+				
 				//Find the spot in the DOM to insert our map image
-				var lastEl = $(parentEl).find('label:contains("West")').parent().parent(); //The last coordinate listed
+				var lastEl = ($(parentEl).find('label:contains("West")').parent().parent().length) ? $(parentEl).find('label:contains("West")').parent().parent() :  parentEl; //The last coordinate listed
 				lastEl.append(mapHTML);
-			});
+
+			}
+			
+			return true;
 
 		},
 		
@@ -286,13 +324,15 @@ define(['jquery',
 		
 		// this will insert the DOI publish button
 		insertDoiButton: function(pid) {
-			
+						
 			// first check if already a DOI
 			if (this.isDOI(pid)) {
 				console.log(pid + " is already a DOI");
 				return;
 			}
 			
+			var encodedPid = encodeURIComponent(pid);
+
 			// see if the user is authorized to update this object
 			var authServiceUrl = appModel.get('authServiceUrl');
 
@@ -311,12 +351,11 @@ define(['jquery',
 			
 			// get the /meta for the pid
 			$.get(
-				metaServiceUrl + pid,
+				metaServiceUrl + encodedPid,
 				function(data, textStatus, xhr) {
 					
 					// the response should have all the elements we want
 					identifier = $(data).find("identifier").text();
-					console.log('identifier: ' + identifier);
 					formatId = $(data).find("formatId").text();
 					size = $(data).find("size").text();
 					checksum = $(data).find("checksum").text();
@@ -342,7 +381,7 @@ define(['jquery',
 						
 						// are we authorized to publish?
 						$.ajax({
-								url: authServiceUrl + pid + "?action=changePermission",
+								url: authServiceUrl + encodedPid + "?action=changePermission",
 								type: "GET",
 								xhrFields: {
 									withCredentials: true
@@ -392,7 +431,8 @@ define(['jquery',
 						
 						//If we find a match, replace the ecogrid links with a DataONE API link to the object
 						if(pids[i].indexOf(ecogridPid) > -1){
-							$(thisLink).attr('href', appModel.get('objectServiceUrl') + pids[i]);
+							
+							$(thisLink).attr('href', appModel.get('objectServiceUrl') + encodeURIComponent(pids[i]));
 							$(thisLink).text(pids[i]);
 							
 							//Insert an anchor near this spot in the DOM
@@ -479,13 +519,14 @@ define(['jquery',
 		
 		// this will lookup the latest version of the PID
 		showLatestVersion: function(pid, traversing) {
-			var obsoletedBy = null;
+			var obsoletedBy = null,
+				encodedPid = encodeURIComponent(pid);
 			// look up the metadata
 			var metaServiceUrl = appModel.get('metaServiceUrl');			
 
 			// look up the meta
 			var viewRef = this;
-			$.get(metaServiceUrl + pid, function(data, textStatus, xhr) {
+			$.get(metaServiceUrl + encodedPid, function(data, textStatus, xhr) {
 						
 				// the response should have a resourceMap element
 				obsoletedBy = $(data).find("obsoletedBy").text();
@@ -506,17 +547,10 @@ define(['jquery',
 				}
 			});	
 		},
-
 		
 		showLoading: function(message) {
 			this.hideLoading();
 			this.scrollToTop();
-			/*var content = '<section id="Notification">';
-			if (msg) {
-				content += '<div class="alert alert-info">' + msg + '</div>';
-			}
-			content += '<div class="progress progress-striped active"><div class="bar" style="width: 100%"></div></div></section>';
-			*/
 			this.$el.prepend(this.loadingTemplate({msg: message}));
 		},
 		
@@ -533,5 +567,6 @@ define(['jquery',
 			console.log('Closing the metadata view');
 		}				
 	});
+	
 	return MetadataView;		
 });
