@@ -211,8 +211,8 @@ define(['jquery',
 				var mapCenter = searchModel.get('map').center;
 			}
 			else{
-				var mapZoom = 7;
-				var mapCenter = new gmaps.LatLng(47.0, -111.0);
+				var mapZoom = 5;
+				var mapCenter = new gmaps.LatLng(42.0, -111.0);
 			}
 			
 			var mapOptions = {
