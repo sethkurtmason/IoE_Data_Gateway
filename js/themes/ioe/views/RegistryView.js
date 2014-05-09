@@ -226,7 +226,7 @@ define(['jquery', 'underscore', 'backbone', 'registry', 'bootstrap', 'text!templ
 				return true;
 			// trim username & passwd:
 			var username = this.trimString(formObj.elements["uid"].value);
-			var organization = this.trimString(formObj.elements["organization"].value);
+			//var organization = this.trimString(formObj.elements["organization"].value);
 			var password = this.trimString(formObj.elements["password"].value);
 
 			if (username == "") {
