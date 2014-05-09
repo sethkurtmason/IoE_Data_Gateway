@@ -235,11 +235,11 @@ define(['jquery', 'underscore', 'backbone', 'registry', 'bootstrap', 'text!templ
 				return false;
 			}
 
-			if (organization == "") {
-				alert("You must select an organization. \n");
-				formObj.elements["organization"].focus();
-				return false;
-			}
+			//if (organization == "") {
+			//	alert("You must select an organization. \n");
+			//	formObj.elements["organization"].focus();
+			//	return false;
+			//}
 
 			if (password == "") {
 				alert("You must type a password. \n");
@@ -247,9 +247,8 @@ define(['jquery', 'underscore', 'backbone', 'registry', 'bootstrap', 'text!templ
 				return false;
 			}
 
-			formObj.username.value = "uid=" + formObj.elements["uid"].value + ",o="
-					+ formObj.elements["organization"].value
-					+ ",dc=montana,dc=edu";
+			formObj.username.value = "cn=" + formObj.elements["uid"].value + ",ou=people"
+					+ ",dc=rcg,dc=montana,dc=edu";
 			
 			// get the form data before replacing everything with the loading icon!
 			var formData = $("#loginForm").serialize();
