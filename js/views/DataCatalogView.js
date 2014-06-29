@@ -185,7 +185,7 @@ define(['jquery',
 		renderMap: function() {
 			
 			//If gmaps isn't enabled or loaded with an error, use list mode
-			if (!gmaps) {
+	    	if (!gmaps) {
 				this.ready = true;
 				appModel.set('searchMode', 'list');
 				return;
@@ -206,7 +206,7 @@ define(['jquery',
 			}
 			else{
 				var mapZoom = 5;
-				var mapCenter = new gmaps.LatLng(40.556, -105.54);
+				var mapCenter = new gmaps.LatLng(42.5, -104.5);
 			}
 			
 			var mapOptions = {
