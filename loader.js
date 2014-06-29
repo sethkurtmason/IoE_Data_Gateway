@@ -2,7 +2,7 @@
 var theme 		   = document.getElementById("loader").getAttribute("data-theme");
 var metacatContext = document.getElementById("loader").getAttribute("data-metacat-context");
 var mapKey 		   = document.getElementById("loader").getAttribute("data-map-key");
-if ((mapKey == "AIzaSyDH-qZoHlo-b4ayGVgqk0-IYUNThXFhqqY") || (!mapKey)) mapKey = null;
+if ((mapKey == "YOUR-GOOGLE-MAPS-API-KEY") || (!mapKey)) mapKey = null;
 
 // Step 2: let everything else be taken care of by the app
 preventCompatibilityIssues();
