@@ -43,6 +43,22 @@ define(['jquery',
 		markers: {},
 		
 		markerClusterer: {},
+				
+		markerImage: './img/markers/orangered-marker.png',
+		
+		markerImageAlt: './img/markers/orangered-enlarged-marker.png',
+		
+		markerImage15: './img/markers/orangered-15px-25a.png',
+		
+		markerImage20: './img/markers/orangered-20px-25a.png',
+		
+		markerImage30: './img/markers/orangered-30px-25a.png',
+		
+		markerImage40: './img/markers/orangered-40px-25a.png',
+		
+		markerImage50: './img/markers/orangered-50px-25a.png',
+		
+		markerImage60: './img/markers/orangered-60px-25a.png',
 		
 		reservedMapPhrase: 'Only results with all spatial coverage inside the map',
 		
@@ -74,29 +90,7 @@ define(['jquery',
 		},
 		
 		initialize: function () {
-			var view = this;
 			
-			//Set the file paths for our map markers - check for custom markers first
-			$.get("./js/themes/" + theme + "/img/markers/map-marker.png", function(data, status, xhr){
-				//Custom map marker images were found
-				view.markerImage   = "./js/themes/" + theme + "/img/markers/map-marker.png";					
-				view.markerImage15 = './js/themes/' + theme + "/img/markers/cluster-15px.png";
-				view.markerImage20 = "./js/themes/" + theme + "/img/markers/cluster-20px.png";
-				view.markerImage30 = "./js/themes/" + theme + "/img/markers/cluster-30px.png";
-				view.markerImage40 = "./js/themes/" + theme + "/img/markers/cluster-40px.png";
-				view.markerImage50 = "./js/themes/" + theme + "/img/markers/cluster-50px.png";
-				view.markerImage60 = "./js/themes/" + theme + "/img/markers/cluster-60px.png";
-			})
-			.error(function(){
-				//Custom markers were not found - use the default images
-				view.markerImage   = "./img/markers/map-marker.png";						
-				view.markerImage15 = './img/markers/cluster-15px.png';
-				view.markerImage20 = './img/markers/cluster-20px.png';
-				view.markerImage30 = './img/markers/cluster-30px.png';
-				view.markerImage40 = './img/markers/cluster-40px.png';
-				view.markerImage50 = './img/markers/cluster-50px.png';
-				view.markerImage60 = './img/markers/cluster-60px.png';
-			});
 		},
 				
 		// Render the main view and/or re-render subviews. Don't call .html() here
@@ -1192,14 +1186,13 @@ define(['jquery',
 
 			$.get(appModel.get('queryServiceUrl') + facetQuery, function(data, textStatus, xhr) {
 				
-				var facetCounts = data.facet_counts.facet_fields,
-					facetLimit  = 999;
+				var facetCounts = data.facet_counts.facet_fields;
 								
 				//***Set up the autocomplete (jQueryUI) feature for each text input****//				
 				//For the 'all' filter, use keywords
 				var allSuggestions = facetCounts.keywords;
 				var rankedSuggestions = new Array();
-				for (var i=0; i < Math.min(allSuggestions.length-1, facetLimit); i+=2) {
+				for (var i=0; i < allSuggestions.length-1; i+=2) {
 					rankedSuggestions.push({value: allSuggestions[i], label: allSuggestions[i] + " (" + allSuggestions[i+1] + "+)"});
 				}
 
@@ -1245,7 +1238,7 @@ define(['jquery',
 						attributeNameSuggestions, 
 						attributeLabelSuggestions);
 				var rankedAttributeSuggestions = new Array();
-				for (var i=0; i < Math.min(attributeSuggestions.length-1, facetLimit); i+=2) {
+				for (var i=0; i < attributeSuggestions.length-1; i+=2) {
 					rankedAttributeSuggestions.push({value: attributeSuggestions[i], label: attributeSuggestions[i] + " (" + attributeSuggestions[i+1] + ")"});
 				}
 				$('#attribute_input').autocomplete({
@@ -1280,7 +1273,7 @@ define(['jquery',
 				// suggest characteristics
 				var characteristicSuggestions = facetCounts.characteristic_sm;
 				var rankedCharacteristicSuggestions = new Array();
-				for (var i=0; i < Math.min(characteristicSuggestions.length-1, facetLimit); i+=2) {
+				for (var i=0; i < characteristicSuggestions.length-1; i+=2) {
 					rankedCharacteristicSuggestions.push({value: characteristicSuggestions[i], label: characteristicSuggestions[i].substring(characteristicSuggestions[i].indexOf("#")) });
 				}
 				$('#characteristic_input').autocomplete({
@@ -1315,7 +1308,7 @@ define(['jquery',
 				// suggest standards
 				var standardSuggestions = facetCounts.standard_sm;
 				var rankedStandardSuggestions = new Array();
-				for (var i=0; i < Math.min(standardSuggestions.length-1, facetLimit); i+=2) {
+				for (var i=0; i < standardSuggestions.length-1; i+=2) {
 					rankedStandardSuggestions.push({value: standardSuggestions[i], label: standardSuggestions[i].substring(standardSuggestions[i].indexOf("#")) });
 				}
 				$('#standard_input').autocomplete({
@@ -1346,11 +1339,11 @@ define(['jquery',
 						at: "left bottom"				
 					}
 				});
-			
+				
 				// suggest creator names/organizations
 				var originSuggestions = facetCounts.origin;
 				var rankedOriginSuggestions = new Array();
-				for (var i=0; i < Math.min(originSuggestions.length-1, facetLimit); i+=2) {
+				for (var i=0; i < originSuggestions.length-1; i+=2) {
 					rankedOriginSuggestions.push({value: originSuggestions[i], label: originSuggestions[i] + " (" + originSuggestions[i+1] + ")"});
 				}
 				$('#creator_input').autocomplete({
@@ -1402,7 +1395,7 @@ define(['jquery',
 						orderSuggestions,
 						classSuggestions);
 				var rankedTaxonSuggestions = new Array();
-				for (var i=0; i < Math.min(taxonSuggestions.length-1, facetLimit); i+=2) {
+				for (var i=0; i < taxonSuggestions.length-1; i+=2) {
 					rankedTaxonSuggestions.push({value: taxonSuggestions[i], label: taxonSuggestions[i] + " (" + taxonSuggestions[i+1] + ")"});
 				}
 				$('#taxon_input').autocomplete({
@@ -1438,7 +1431,7 @@ define(['jquery',
 				// suggest location names
 				var spatialSuggestions = facetCounts.site;
 				var rankedSpatialSuggestions = new Array();
-				for (var i=0; i < Math.min(spatialSuggestions.length-1, facetLimit); i+=2) {
+				for (var i=0; i < spatialSuggestions.length-1; i+=2) {
 					rankedSpatialSuggestions.push({value: spatialSuggestions[i], label: spatialSuggestions[i] + " (" + spatialSuggestions[i+1] + ")"});
 				}
 				$('#spatial_input').autocomplete({
@@ -1470,7 +1463,7 @@ define(['jquery',
 						collision: "flip"
 					}
 				});
-			}, "json");
+			});
 		},
 		
 		/* add a marker for objects */
@@ -1891,6 +1884,7 @@ define(['jquery',
 		
 		routeToMetadata: function(e){
 			var id = $(e.target).attr('data-id');
+			console.log($(e.target));
 			
 			//If the user clicked on the download button or any element with the class 'stop-route', we don't want to navigate to the metadata
 			if ($(e.target).hasClass('stop-route')){
