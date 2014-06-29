@@ -72,6 +72,10 @@ Bold 700 Italic
     	color: #660000;
     }
     
+    a:visited{
+    	color: #1C91CB;
+    }
+    
     h1 > a[name], h2 > a[name], h3 > a[name],
     h4 > a[name], h5 > a[name], h6 > a[name] {
       color: #555555;
@@ -154,6 +158,12 @@ Bold 700 Italic
       margin: 35px auto auto auto;
     }
     
+    .code_example{
+        width: inherit;
+        overflow: scroll;
+        margin-bottom: 10px;
+    }
+    
 /* FORM/INPUT CUSTOMIZATIONS
 -------------------------------------------------- */ 
 	.controls-well {
@@ -228,6 +238,39 @@ Bold 700 Italic
   	display: block;
   }
 
+/* MAIN CONTENT CSS
+-------------------------------------------------- */  
+    .logo-bar{
+        min-height: 10px;
+        background-color: #5D6164;
+        margin-top: 30px;
+        margin-bottom: 30px;
+        padding:25px;
+        border-bottom: 1px solid;
+        border-top: 1px solid;
+        boarder-color: white;
+    }
+    .logo-thumbnail {
+        float: none;
+        max-width:200px;
+        margin:15px;
+    }
+    
+    .pull-left{
+        float:left;
+        margin-right: 45px;
+    }
+    
+    .pull-right{
+        float:right;
+        margin-left: 45px;
+    }
+    
+    .intro{
+        width: 45%;
+        float: left;
+    }
+    
   
 /* FOOTER CSS
 -------------------------------------------------- */    
@@ -456,7 +499,7 @@ Bold 700 Italic
     }
     
     #search_btn.btn {
-      background-color: #992222;
+      background-color: #6C94A4;
       color: #FFFFFF;
       
     }
@@ -590,7 +633,7 @@ img[src*="gstatic.com/"], img[src*="googleapis.com/"]  {
 }
 
 .gmaps-infowindow{
-	max-height: 400px;
+	max-height: 300px;
 	overflow-y:scroll;
 }
 
@@ -1289,7 +1332,7 @@ svg .default{
 	font-size: 24px;
 }
 .donut-title-text,
-svg .title{
+.title{
 	color: #555555;
 	fill: #555555;
 	font-size: 17px;
@@ -1315,9 +1358,7 @@ svg .title{
 .donut-arc-count.rotated{
 	opacity: 0;
 }
-.donut-arc-label{
-	font-size: 13px;
-}
+
 /* Donut arc colors */
 .donut.metadata > g:nth-child(even) .donut-arc,
 .donut.metadata > g:nth-child(even) .donut-arc-label
@@ -1398,28 +1439,14 @@ svg .domain{
 	stroke: #555555;
 }
 svg .point{
-	stroke: #FFFFFF;
+	fill: #FFFFFF;
 	stroke-width: 2px;
 }
-.line-chart-label{
+svg .line-chart-label{
 	font-weight: bold;
 	font-size: 14px;
 	stroke-width: 0px;
-	display: none;
-}
-.line-chart-label.bg{
-	stroke-width: 2px;
-	fill: #FFF;
-	stroke: #FFF;
-	opacity: 0.8;
-}
-.line-chart-label.text{
-	font-weight: bold;
-	fill: #555;
-}
-.tick line{
-	stroke-width: 1px;
-	stroke: #DDD;
+	opacity: 0;
 }
 svg> .title{
 	font-size: 15px;
@@ -1435,7 +1462,10 @@ svg .tick text{
 svg .domain{
 	stroke-width: 0px;
 }
-
+svg .point:hover + .line-chart-label{
+	opacity: 1;
+	transition: all .5s;
+}
 
 /* Circle Badges */
 .circle-badge{
@@ -1508,17 +1538,6 @@ svg .domain{
 	.citation .span10{
 		width: 100%;
 	}
-	
-	.controls-well img{
-		max-width: 90%;
-		max-height: 900px;
-		margin: 0 auto;
-		display: block;
-	}
-	
-	.controls-well > .btn{
-		margin-left: 180px;
-	}
     
     /* Google Map Images for Geographic Region */
     .georegion-map{
@@ -1538,8 +1557,21 @@ svg .domain{
     } 
     
     .download-this-package{
-    	clear: both;
-    	margin-left: 5px;
+    	float: left;
+    	height: 100%;
+    	margin-left: 20px;
+    }
+    
+    .download-this-package a{
+    	margin-top: 15%;
+    	background-color: #992222;
+    	color: #FFFFFF;
+    	text-shadow: none;
+    }
+    
+    .download-this-package a:hover{
+    	background-color: #660000;
+    	color: #FFFFFF;
     }
     
     .download-this-package a.metadata{
@@ -1552,8 +1584,9 @@ svg .domain{
     
     /* Resource map contents table */
     
-    #downloadContents .controls-well{
-    	overflow-x: scroll;
+    #downloadContents{
+    	margin-bottom: 40px;
+    	overflow: overlay;
     }
     
     table.download-contents{
@@ -1562,23 +1595,14 @@ svg .domain{
     }
     
     table.download-contents td{
-    	min-width: 90px;
-    }
-    
-    .download-contents .id{
-    	max-width: 100px;
-    }
-    
-    .download-contents td,
-    .download-contents .id{
-    	overflow-wrap: break-word;
+    	min-width: 115px;
     }
     
     .format-type i{
     	margin-right: 5px;
     }
-    td.format-type {
-    	text-transform: lowercase;
+    .format-type {
+    	text-transform: capitalize;
     }
     
     .file-type i{
@@ -1608,10 +1632,6 @@ svg .domain{
     	margin-bottom: 20px;
     	width: auto;
     }
-    
-    .taxonomic-range > .control-group{
-    	margin-left: 180px;
-    }
     .taxonomic-range .control-label{
     	width: auto;
     	padding: 0px 10px;
@@ -1628,12 +1648,6 @@ svg .domain{
     .taxonomic-range .controls {
 		margin-left: 0px;
 	}
-	
-	.metadata-index {
-		padding: 2%;
-		width: 96%;
-	}
-	
 	/* Registry CSS
 	-------------------------------------------------- */
     #RegistryEntryForm, 
@@ -1682,7 +1696,7 @@ svg .domain{
 -------------------------------------------------- */     
 	.select-editable {
 		position: relative; 
-		height: 45px; 
+		height: 30px; 
 	}
 	.select-editable select { 
 		position:absolute; 
@@ -2314,9 +2328,12 @@ svg .domain{
 	}
 	
 	#countstats:before{
-		content: "Datasets ";
+		content: "Listing ";
 	}
-
+	
+	.mapMode #countstats:before{
+		content: "Mapping ";
+	}
 	#statcounts{
 		min-width: 500px;
 	}
@@ -3110,7 +3127,7 @@ svg .domain{
  
 
 
-/* -----  CSS FOR emlparser -----
+/* -----  CSS FOR emlspec -----
 ------------------------------------------------ */
 
  *	  Color Scheme:
@@ -3366,11 +3383,16 @@ img.inlineright {
 
 .subGroup {
     padding:                    3px;
+    color:                      #003366;
     voice-family:               "\"}\""; /* begin ie5win hack */
     voice-family:               inherit;
     -moz-border-radius:         10px; /* end ie5win hack */
     }
  
+.subGroup_border {
+    /* blue-ish border */
+    border:                     #94c1d4 solid 1px;
+    }
 
 /* This selector causes the 'section' tables to indent under the overarching div
  * tags */
@@ -3416,6 +3438,19 @@ th.rowheader {
     background:                 #f1f8f8;
     border-right:               #94c1d4 solid 1px;
     }
+
+.rowodd {
+    border-bottom:              #94c1d4 dotted 1px;
+    border-top:                 #94c1d4 dotted 1px;
+    background-color:           #f1f8f8;
+    padding:                    0;
+    margin:                     0;
+} 
+
+.roweven {
+    padding:                    0;
+    margin:                     0;
+} 
 
 .coleven {
     border-left:                #94c1d4 dotted 1px;
@@ -3618,6 +3653,10 @@ iframe classes
     margin:                     0;
 }
 .tablehead {
+    border-bottom:              #006666 solid 1px;
+    color:                      #003366;
+    padding:                    0;
+    margin:                     0;
     text-align:                 left;
     font-style:                 normal;
     font-weight:                700;
@@ -3633,6 +3672,7 @@ div.book {
 }
 
 div.title {
+    color:                      #003366;
     background-color:           #ffffff;
     padding:                    0;
     font-size:                  16pt;
