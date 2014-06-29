@@ -26,7 +26,6 @@ Bold 700
     body {
       background-color: #555555; /*IE 8 fallback*/
       background: rgba(0, 0, 0, .8);
-      font: 400 15px/20px "Source Sans Pro", "Helvetica Nueue", "Helvetica", "sans serif";
       min-height: 100%;
       position: relative;
     }
@@ -41,7 +40,7 @@ Bold 700
     	text-decoration: none;
     }
     
-    body, h1, h2, h3, h4, h5, h6, i{
+    body, h1, h2, h3, h4, h5, h6{
     	color: #555;
     }
     
@@ -204,13 +203,22 @@ Bold 700
 	    padding: 4px;
 	    backgorund-color: #FFFFFF; /*IE 8 fallback */
 	    background: rgba(255, 255, 255, 0.3);
+	   	border: 1px solid #fff;
+		border-radius: 3px;
+		-webkit-border-radius: 3px;
+		-moz-border-radius: 3px;
 	}
 	.control-label {
 		cursor: default;
 	}
+	.form-horizontal .control-label{
+		width: 110px;
+	}
+	.form-horizontal .controls{
+		margin-left: 130px;
+	}
 	
 	select{
-    	font: 400 14px/14px "Source Sans Pro", Arial, sans-serif;
     	width: auto;
     }
 
@@ -411,7 +419,8 @@ Bold 700
     } 
     
     .download-this-package{
-    	margin-left: 20px;
+    	clear: both;
+    	margin-left: 5px;
     }
     
     .download-this-package i{
@@ -732,9 +741,6 @@ Bold 700
 
 /* METADATA VIEW CSS
 -------------------------------------------------- */
-	label.control-label{
-		font: 400 15px/18px "Source Sans Pro", Arial, sans-serif;
-	}
 		
 	#Metadata > a[href="#data"]{
 		display: block;
@@ -756,6 +762,13 @@ Bold 700
 		font-weight: 400;
 	}
 	
+	.controls-well img{
+		max-width: 90%;
+		max-height: 900px;
+		margin: 0 auto;
+		display: block;
+	}
+	
 	#Metadata h4{
 		font-weight: 600;
 	}
@@ -774,15 +787,24 @@ Bold 700
 		text-shadow: none;
 	}
 	
-	.search-results a.btn{
-		font: 700 14px/14px "Source Sans Pro", Arial, sans-serif;
+	.fancybox.btn{
+		margin-left:180px;
 	}
 	
 	/* Resource map contents table */
-    
-    #downloadContents{
-    	margin-bottom: 40px;
-    	overflow: overlay;
+	
+	span.file-type{
+		font-weight: 600;
+		font-size: 1.1em;
+	}
+	
+	i.file-type{
+		font-size: 1.2em;
+		font-weight: 600;
+	}
+
+    #downloadContents .controls-well{
+    	overflow-x: overlay;
     }
     
     table.download-contents {
@@ -791,17 +813,19 @@ Bold 700
     }
     
     table.download-contents td{
-    	min-width: 115px;
+    	min-width: 90px;
     }
     
-    #downloadContents .control-label{
-    	width: 35px;
+        .download-contents .id{
+    	max-width: 100px;
     }
     
-    #downloadContents .controls-well{
-    	margin-left: 50px;
+    .download-contents td{
+    	overflow-wrap: break-word;
     }
-    
+    .format-type{
+    	text-transform: lowercase;
+    }
     .format-type i {
     	margin-right: 5px;
     }
@@ -816,6 +840,7 @@ Bold 700
     
     th.id {
     	min-width: 180px;
+    	overflow-wrap: break-word;
     }
     
     /*Details link*/
@@ -836,6 +861,9 @@ Bold 700
     	margin-bottom: 20px;
     	width: auto;
     }
+    .taxonomic-range > .control-group{
+    	margin-left: 180px;
+    }
     .taxonomic-range .control-label{
     	width: auto;
     	padding: 0px 10px;
@@ -852,7 +880,11 @@ Bold 700
     .taxonomic-range .controls {
 		margin-left: 0px;
 	}
-
+	
+	.metadata-index {
+		padding: 2%;
+		width: 96%;
+	}
     
 /* Registry CSS
 -------------------------------------------------- */
@@ -895,7 +927,7 @@ Bold 700
 -------------------------------------------------- */     
 	.select-editable {
 		position: relative; 
-		height: 30px; 
+		height: 45px; 
 	}
 	.select-editable select { 
 		position:absolute; 
@@ -1251,7 +1283,6 @@ Bold 700
 	.current-filters[class*="span"]{
 		list-style: none;
 		color: #FFFFFF;
-		font: 400 14px/14px "Source Sans Pro", Arial, sans-serif;
 		margin-left: 10px;
 		min-height: 0px;
 	}
@@ -1281,6 +1312,7 @@ Bold 700
 		border-radius: 3px;
 		-webkit-border-radius: 3px;
 		-moz-border-radius: 3px;
+		font-size: 14px;
 	}
 	
 	 #includes-files label,
@@ -1375,7 +1407,6 @@ Bold 700
     
     h3.nav-header,
     h3.nav-header > label{
-    	font: 400 14px/25px "Source Sans Pro" Arial sans-serif;
 		margin: 0px;
 		color: #ddd;
 		text-transform: none;
@@ -1401,7 +1432,6 @@ Bold 700
     
     li.nav-header{
     	text-transform: none;
-		font: 600 13px/13px "Source Sans Pro", "Arial", sans-serif;
 		color: #7F7F7F;
     }
     
@@ -1470,7 +1500,6 @@ Bold 700
     
     li.ui-menu-item > a {
     	color: #555555;
-    	/*font: 400 1em/1.8em "Source Sans Pro", Arial, sans-serif;*/
     	width: 245px;
     }
 	
@@ -1508,16 +1537,16 @@ Bold 700
       height: 76px;
     }
     
-    .result-header-count{
-    font-weight: 600;
-	font-size: 20px;
-	line-height: 25px;
-}
+    #statcounts .result-header-count{
+	    font-weight: 500;
+		font-size: 15px;
+		line-height: 20px;
+		min-height: 20px;
+	}
     
      .mapMode .result-header > .result-header-count{
     	position: relative;
     	width: 100%;
-    	padding-left: 7%;
     }
     
     .mapMode .result-header-count > .result-header-count{
@@ -1552,11 +1581,7 @@ Bold 700
     }
     
     #countstats:before{
-		content: "Listing ";
-	}
-	
-	.mapMode #countstats:before{
-		content: "Mapping ";
+		content: "Datasets ";
 	}
     
     .map-pointer{
@@ -1582,7 +1607,7 @@ Bold 700
 		display: none;
 	}
 	
-    .mapMode #sortOrder{
+    #sortOrder{
     	border: 1px solid #CCC;
     	border-radius: 4px;
     	-webkit-border-radius: 4px;
@@ -1590,43 +1615,32 @@ Bold 700
     	background-color: #FFF;
     	width: auto;
  		right: 10px;
- 		margin-top: 5px;
-		height: 30px;
+		height: 22px;
+		line-height: 15px;
+		font-size: 12px;
 		z-index: 1;
     }
     
     #statcounts{
     	float: none;
-    	margin-top: 10px;
+    	padding-top: 5px;
+    	min-height: 20px;
     }
  	
  	.mapMode #statcounts{
- 		width: 44.5%;
- 		padding-left: 10px;
- 		height: inherit;
- 		left: 30%;
- 		margin-left: 0px;
- 		margin-top: 0px;
  		position: fixed;
- 	}
- 	
- 	.mapMode #statcounts{
- 		left: 55%;
- 		border-top-left-radius: 4px;
- 		text-transform: 0 1px 0 rgba(255,255,255,0.5);
- 		color: #666;
+ 		margin-left: 0px;
+ 		padding-left: 1%;
  		background-color: #FFF;
  	}
  	
  	.mapMode .pagination label{
  		display: inline;
-		font-weight: 600;
- 		margin-right: 5px;
  	}
    
    /*-- Results rows --*/
    .mapMode #results{
-   		margin-top: 42px;
+   		margin-top: 16px;
    		width: 100%;
    		overflow-x: hidden;
    		float: right;
@@ -1635,19 +1649,17 @@ Bold 700
 		box-shadow:         -4px -2px 5px rgba(50, 50, 50, 0.4);
    }
    
-   .mapMode #results{
-   		width: 100%;
-   }
-   
     .mapMode .search-results{
     	background-color: #FFFFFF; /* IE 8 fallback */
     	background-color: rgba(255,255,255,0.9);
     	margin-top: 10px;
     }
     
-    .mapMode .search-results > p{
-    	text-align: center;
-    	padding-top: 5px;
+    .search-results > p{
+    	display: block;
+		width: 9%;
+		min-width: 115px;
+		margin: 0px auto;
     }
     
     .mapMode #collapse-content{
@@ -1669,7 +1681,6 @@ Bold 700
       display: block;
       padding: 4px 1%;
       width: 98%;
-      font: 400 14px/18px "Source Sans Pro" Arial, sans-serif;
     }
     
     .result-row:nth-child(odd){
@@ -1751,7 +1762,7 @@ Bold 700
     }
     
     .info-icons .on-map > i.on-map{
-    	color: #DA4D3A;
+    	color: #00ADEF;
     	cursor: default;
     }
     
@@ -1884,7 +1895,7 @@ Bold 700
     }
     .mapMode .pagination {
     	cursor: pointer;
-    	margin: 30px auto;
+    	margin: 25px auto;
     	padding-bottom: 2px;
     	width: 70%;
     	left: 30%;
@@ -1901,8 +1912,11 @@ Bold 700
     #resultspager{
     	float: left;
     	padding-left: 2%;
-    	margin-top:10px;
+    	margin-top:5px;
+    	margin-bottom: 5px;
     	width: 100%;
+    	min-height: 20px;
+    	height: 24px;
     }
 
 	.pagination ul{
@@ -1916,7 +1930,8 @@ Bold 700
 	.pagination ul > li > a{
 		background-color: #EEE;
 		color: #555;
-		font-size: 14px;
+		font-size: 12px;
+		font-weight: normal;
 		line-height: 14px;	
 		border: 1px solid #CCC;	
 	}
@@ -1945,10 +1960,14 @@ Bold 700
 		width: 180px;
 		float: right;
 		margin-right: 10px;
+		min-height: 20px;
+		height: 30px;
 	}
 	
 	.pagination .sort-by label{
 		display: inline;
+		font-size: 12px;
+		vertical-align: top;
 	}
 	
 	    
@@ -2071,7 +2090,7 @@ svg .default{
 	font-size: 24px;
 }
 .donut-title-text,
-.title{
+svg .title{
 	color: #555555;
 	fill: #555555;
 	font-size: 17px;
@@ -2093,6 +2112,9 @@ svg .default{
 	font-size: 14px;
 	opacity: 0.7;
 	transition: opacity .2s;
+}
+.donut-arc-label{
+	font-size: 13px;
 }
 .donut-arc-count.rotated{
 	opacity: 0;
@@ -2180,11 +2202,24 @@ svg .point{
 	fill: #FFFFFF;
 	stroke-width: 2px;
 }
-svg .line-chart-label{
+.line-chart-label{
 	font-weight: bold;
 	font-size: 14px;
 	stroke-width: 0px;
-	opacity: 0;
+	display: none;
+}
+.line-chart-label.text{
+		fill: #555;
+}
+.line-chart-label.bg{
+	stroke-width: 2px;
+	fill: #FFF;
+	stroke: #FFF;
+	opacity: 0.8;
+}
+.tick line{
+	stroke-width: 1px;
+	stroke: #CCC;
 }
 svg> .title{
 	font-size: 15px;
@@ -2200,7 +2235,7 @@ svg .tick text{
 svg .domain{
 	stroke-width: 0px;
 }
-svg .point:hover + .line-chart-label{
+svg .point:hover ~ .line-chart-label{
 	opacity: 1;
 	transition: all .5s;
 }
@@ -2266,7 +2301,7 @@ svg .point:hover + .line-chart-label{
 }
 
 .gmaps-infowindow{
-	max-height: 300px;
+	max-height: 400px;
 	overflow-y:scroll;	
 }
 
@@ -2317,11 +2352,11 @@ svg .point:hover + .line-chart-label{
 }
 
 .mapMode #toggle-map{
-	left: -90px;
+	left: -100px;
 }
 
 #toggle-map{
-	left: -100px;
+	left: -120px;
 }
 
 #toggle-map:hover{
@@ -2406,7 +2441,6 @@ img[src*="gstatic.com/"], img[src*="googleapis.com/"]  {
 	-webkit-border-radius: 20px 0px 0px 20px;
 	-moz-border-radius: 20px 0px 0px 20px;
 	font-size: 30px; 
-	font-family: "Source Sans Pro";
 	border: 3px solid #EEEEEE;
 	border-right: 0px; 
 	padding-left: 20px;
@@ -2644,7 +2678,6 @@ img[src*="gstatic.com/"], img[src*="googleapis.com/"]  {
 	clear: both;
 	margin: 20px auto 0 auto;
 	color: #CCCCCC;
-	font: 300 14px/14px "Source Sans Pro", Arial, sans-serif;
 }
 
 #metacatDocs > .footer > .footerNav{
@@ -2679,11 +2712,9 @@ img[src*="gstatic.com/"], img[src*="googleapis.com/"]  {
 #metacatDocs th{
     	background-color: #555555;
     	color: #FFFFFF;
-    	font: 300 16px/20px "Source Sans Pro", Arial, sans-serif;
     }
     
 #metacatDocs td{
-    	font: 400 15px/20px "Source Sans Pro", Arial, sans-serif;
     }
     
 #metacatDocs tr.row-odd{
@@ -2747,7 +2778,6 @@ img[src*="gstatic.com/"], img[src*="googleapis.com/"]  {
  .figure > .caption{
 	 margin-bottom: 0px;
 	text-align: center;
-	font: 400 14px/14px "Source Sans Pro", Arial, sans-serif;
 	color: #666;
 	padding-top: 10px;
  }
@@ -2799,7 +2829,6 @@ img[src*="gstatic.com/"], img[src*="googleapis.com/"]  {
     }
     
     #metacatDocs h3 {
-		font: 400 24.5px/40px "Source Sans Pro", sans-serif;
 	}
 	
 	#metacatDocs h2{

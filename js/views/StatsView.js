@@ -182,8 +182,9 @@ define(['jquery', 'underscore', 'backbone', 'd3', 'LineChart', 'BarChart', 'Donu
 								id: "upload-chart",
 						 className: "metadata",
 						 	yLabel: "files uploaded",
+						labelValue: "Metadata: ",
 						 frequency: frequency, 
-							radius: 5
+							radius: 4
 						});
 				
 				this.$('.upload-chart').html(lineChartView.render().el);
@@ -192,6 +193,7 @@ define(['jquery', 'underscore', 'backbone', 'd3', 'LineChart', 'BarChart', 'Donu
 				if(statsModel.get("dataUploads")){
 					//Add a line to our chart for data uploads
 					lineChartView.className = "data";
+					lineChartView.labelValue ="Data: ";
 					lineChartView.addLine(statsModel.get('dataUploadDates'));
 				}
 			}
@@ -203,6 +205,7 @@ define(['jquery', 'underscore', 'backbone', 'd3', 'LineChart', 'BarChart', 'Donu
 									id: "upload-chart",
 							 className: "data",
 							 	yLabel: "files uploaded",
+							labelValue: "Data: ",
 							 frequency: frequency, 
 								radius: 4
 							 });
@@ -213,6 +216,7 @@ define(['jquery', 'underscore', 'backbone', 'd3', 'LineChart', 'BarChart', 'Donu
 					if(statsModel.get("metadataUploads")){
 						//Add a line to our chart for metadata uploads
 						lineChartView.className = "metadata";
+						lineChartView.labelValue = "Metadata: ";
 						lineChartView.addLine(statsModel.get('metadataUploadDates'));
 					}
 				}

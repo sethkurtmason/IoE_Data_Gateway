@@ -9,9 +9,13 @@ console.log("Using themeMap: " + themeMap);
 console.log("Using metacatContext: " + metacatContext);
 
 var recaptchaURL = 'https://www.google.com/recaptcha/api/js/recaptcha_ajax';
-if (mapKey){
-	var gmapsURL = 'https://maps.googleapis.com/maps/api/js?v=3&sensor=false&key=' + mapKey;
-}
+var gmapsURL = 'https://maps.googleapis.com/maps/api/js?v=3&sensor=false&key=' + mapKey;
+define('gmaps', 
+		['async!' + gmapsURL], 
+		function() {
+			return google.maps;
+		}
+	);
 
 /* Configure the app to use requirejs, and map dependency aliases to their
    directory location (.js is ommitted). Shim libraries that don't natively 
@@ -38,9 +42,8 @@ require.config({
     domReady: '../components/domready',
     async: '../components/async',
     recaptcha: [recaptchaURL, 'scripts/placeholder'],
-    gmapsAPI: gmapsURL,
 	markerClusterer: '../components/markerclustererplus_2.1.2',
-	geohash: '../components/geohash/main',
+	nGeohash: '../components/geohash/main',
 	fancybox: '../components/fancybox/jquery.fancybox.pack', //v. 2.1.5
 	//Have a null fallback for our d3 components for browsers that don't support SVG
 	d3: ['../components/d3.v3.min', null],
@@ -67,37 +70,44 @@ require.config({
     markerClusterer: {
 		exports: "MarkerClusterer"
 	},
-	geohash: {
+	nGeohash: {
 		exports: "geohash"
 	}
   }
 });
 
+
 /** 
  * Define Google Maps API if we can load the first script for it
  * Allows running without internet connection
- */
-require(['gmapsAPI'],
-	function(gmapsAPI) {
-		console.log("Loaded gmapsAPI...continuing with asynchronous load");
-		define('gmaps', 
-				['async!' + gmapsURL], 
-				function() {
-					return google.maps;
-				}
-			);
-	},
-	function(err) {
-		console.log("Error loading gmapsAPI, falling back to placeholder");
-		define('gmaps', 
-				[null], 
-				function() {
-					return null;
-				}
-			);
-	}
-);
-
+ *
+if (mapKey){
+	var gmapsURL = 'https://maps.googleapis.com/maps/api/js?v=3&sensor=false&key=' + mapKey;
+	require([gmapsURL],
+		function(gmapsAPI) {
+			console.log("Loaded gmapsAPI...continuing with asynchronous load");
+			define('gmaps', 
+					['async!' + gmapsURL], 
+					function() {
+						return google.maps;
+					}
+				);
+		},
+		function(err) {
+			console.log("Error loading gmapsAPI, falling back to placeholder");
+			define('gmaps', 
+					[null], 
+					function() {
+						return null;
+					}
+				);
+		}
+	);
+}
+else{
+	define('gmaps', null);
+}
+*/
 
 
 
@@ -108,6 +118,7 @@ var appSearchResults = appSearchResults || {};
 var searchModel = searchModel || {};
 var registryModel = registryModel || {};
 var statsModel = statsModel || {};
+var mapModel = mapModel || {};
 
 /* Setup the application scaffolding first  */
 require(['bootstrap', 'views/AppView', 'models/AppModel'],
@@ -119,8 +130,8 @@ function(Bootstrap, AppView, AppModel) {
 	appView = new AppView();
 	
 	/* Now require the rest of the libraries for the application */
-	require(['backbone', 'routers/router', 'collections/SolrResults', 'models/Search', 'models/RegistryModel', 'models/Stats'],
-	function(Backbone, UIRouter, SolrResultList, Search, RegistryModel, Stats) {
+	require(['backbone', 'routers/router', 'collections/SolrResults', 'models/Search', 'models/RegistryModel', 'models/Stats', 'models/Map'],
+	function(Backbone, UIRouter, SolrResultList, Search, RegistryModel, Stats, MapModel) {
 		'use strict';  
 	    		
 		appSearchResults = new SolrResultList([], {});
@@ -130,6 +141,8 @@ function(Bootstrap, AppView, AppModel) {
 		registryModel = new RegistryModel();
 		
 		statsModel = new Stats();
+		
+		mapModel = new MapModel();
 		
 		// Initialize routing and start Backbone.history()
 		uiRouter = new UIRouter();

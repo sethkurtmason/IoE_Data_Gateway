@@ -83,7 +83,9 @@ define(['jquery', 'underscore', 'backbone'],
 			
 			//Get the earliest temporal data coverage year
 			var query = "q=" + this.get('query') +
-					"+(beginDate:18*%20OR%20beginDate:19*%20OR%20beginDate:20*)+-obsoletedBy:*" + //Only return results that start with 18,19, or 20 to filter badly formatted data (e.g. 1-01-03 in doi:10.5063/AA/nceas.193.7)
+					"+(beginDate:18*%20OR%20beginDate:19*%20OR%20beginDate:20*)" + //Only return results that start with 18,19, or 20 to filter badly formatted data (e.g. 1-01-03 in doi:10.5063/AA/nceas.193.7)
+					"+-obsoletedBy:*" +
+					"+readPermission:public" +
 					"&rows=1" +
 					"&wt=json" +	
 					"&fl=beginDate" +
@@ -111,6 +113,7 @@ define(['jquery', 'underscore', 'backbone'],
 			//Get the latest temporal data coverage year
 			var query = "q=" + this.get('query') +
 					"+(endDate:18*%20OR%20endDate:19*%20OR%20endDate:20*)+-obsoletedBy:*" + //Only return results that start with 18,19, or 20 to filter badly formatted data (e.g. 1-01-03 in doi:10.5063/AA/nceas.193.7)
+					"+readPermission:public" +
 					"&rows=1" +
 					"&wt=json" +	
 					"&fl=endDate" +
@@ -141,6 +144,7 @@ define(['jquery', 'underscore', 'backbone'],
 			//Build the query to get the format types
 			var query = "q=" + statsModel.get('query') +
 								  "+%28formatType:METADATA%20OR%20formatType:DATA%29+-obsoletedBy:*" +
+								  "+readPermission:public" +
 								  "&wt=json" +
 								  "&rows=2" +
 							 	  "&group=true" +
@@ -193,6 +197,7 @@ define(['jquery', 'underscore', 'backbone'],
 			
 			var query = "q=" + this.get('query') +
 			"+formatType:DATA+-obsoletedBy:*" +
+			"+readPermission:public" +
 			"&facet=true" +
 			"&facet.field=formatId" +
 			"&facet.limit=-1" +
@@ -217,6 +222,7 @@ define(['jquery', 'underscore', 'backbone'],
 			
 			var query = "q=" + this.get('query') +
 			"+formatType:METADATA+-obsoletedBy:*" +
+			"+readPermission:public" +
 			"&facet=true" +
 			"&facet.field=formatId" +
 			"&facet.limit=-1" +
@@ -246,6 +252,8 @@ define(['jquery', 'underscore', 'backbone'],
 			//Get the earliest upload date	
 			var query =  "q=" + this.get('query') +
 								"+dateUploaded:*" +
+								"+-obsoletes:*"+    //Only count the first version
+								"+readPermission:public" +
 								"&wt=json" +
 								"&fl=dateUploaded" +
 								"&rows=1" +
@@ -269,12 +277,12 @@ define(['jquery', 'underscore', 'backbone'],
 							model.set('totalUploads', data.response.numFound);	
 							
 							var dataQuery =  "q=" + model.get('query') +
-							  "+-obsoletedBy:*+formatType:DATA";
+							  "+-obsoletes:*+formatType:DATA+readPermission:public";
 							
 							var metadataQuery =  "q=" + model.get('query') +
-							  "+-obsoletedBy:*+formatType:METADATA";
+							  "+-obsoletes:*+formatType:METADATA+readPermission:public";
 							  
-							var facets = "&wt=json" +
+							var facets =  "&wt=json" +
 										  "&rows=0" +
 										  "&facet=true" +
 										  "&facet.missing=true" + //Include months that have 0 uploads
@@ -365,6 +373,7 @@ define(['jquery', 'underscore', 'backbone'],
 			var query = "q=" + this.get('query') +
 			  "+(beginDate:18*%20OR%20beginDate:19*%20OR%20beginDate:20*)" + //Only return results that start with 18,19, or 20 to filter badly formatted data (e.g. 1-01-03 in doi:10.5063/AA/nceas.193.7)
 			  "+-obsoletedBy:*" +
+			  "+readPermission:public" +
 			  "&wt=json" +
 			  "&rows=0" +
 			  "&facet=true" +
