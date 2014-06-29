@@ -11,10 +11,9 @@ define(['jquery',
 				'text!templates/mainContent.html',
 				'text!templates/currentFilter.html',
 				'gmaps',
-				'nGeohash',
 				'markerClusterer'
 				], 				
-	function($, $ui, _, Backbone, SearchResultView, CatalogTemplate, CountTemplate, PagerTemplate, ResultItemTemplate, MainContentTemplate, CurrentFilterTemplate, gmaps, nGeohash, MarkerClusterer) {
+	function($, $ui, _, Backbone, SearchResultView, CatalogTemplate, CountTemplate, PagerTemplate, ResultItemTemplate, MainContentTemplate, CurrentFilterTemplate, gmaps, MarkerClusterer) {
 	'use strict';
 	
 	var DataCatalogView = Backbone.View.extend({
@@ -44,18 +43,22 @@ define(['jquery',
 		markers: {},
 		
 		markerClusterer: {},
+				
+		markerImage: './img/markers/orangered-marker.png',
 		
-		tiles: [],
+		markerImageAlt: './img/markers/orangered-enlarged-marker.png',
 		
-		tileCounts: [],
+		markerImage15: './img/markers/orangered-15px-25a.png',
 		
-		markerGeohashes: [],
+		markerImage20: './img/markers/orangered-20px-25a.png',
 		
-		markerInfoWindows: [],
+		markerImage30: './img/markers/orangered-30px-25a.png',
 		
-		tileInfoWindows: [],
+		markerImage40: './img/markers/orangered-40px-25a.png',
 		
-		tileGeohashes: [],
+		markerImage50: './img/markers/orangered-50px-25a.png',
+		
+		markerImage60: './img/markers/orangered-60px-25a.png',
 		
 		reservedMapPhrase: 'Only results with all spatial coverage inside the map',
 		
@@ -84,6 +87,10 @@ define(['jquery',
 				   		 'mouseover .open-marker' : 'openMarker',
 				   	      'mouseout .open-marker' : 'closeMarker',
 		      'mouseover .prevent-popover-runoff' : 'preventPopoverRunoff'
+		},
+		
+		initialize: function () {
+			
 		},
 				
 		// Render the main view and/or re-render subviews. Don't call .html() here
@@ -137,9 +144,6 @@ define(['jquery',
 			
 			for (var i=0; i<categories.length; i++){
 				thisTerm = searchModel.get(categories[i]);
-				
-				if(thisTerm === undefined) break;
-				
 				for (var x=0; x<thisTerm.length; x++){
 					this.showFilter(categories[i], thisTerm[x]);
 				}
@@ -194,14 +198,43 @@ define(['jquery',
 			}
 			
 			$("body").addClass("mapMode");				
-				
+					
+			//If the spatial filters are set, rezoom and recenter the map to those filters
+			if(searchModel.get('north')){
+				var mapZoom = searchModel.get('map').zoom;
+				var mapCenter = searchModel.get('map').center;
+			}
+			else{
+				var mapZoom = 5;
+				var mapCenter = new gmaps.LatLng(40.556, -105.54);
+			}
+			
+			var mapOptions = {
+			    zoom: mapZoom,
+				minZoom: 3,
+			    center: mapCenter,
+				disableDefaultUI: true,
+			    zoomControl: true,
+			    zoomControlOptions: {
+				          style: google.maps.ZoomControlStyle.SMALL,
+				          position: google.maps.ControlPosition.TOP_LEFT
+				        },
+				panControl: false,
+				scaleControl: false,
+				streetViewControl: false,
+				mapTypeControl: true,
+				mapTypeControlOptions:{
+						position: google.maps.ControlPosition.TOP_LEFT
+				},
+			    mapTypeId: google.maps.MapTypeId.TERRAIN
+			};
+			
 			gmaps.visualRefresh = true;
-			var mapOptions = mapModel.get('mapOptions');
 			this.map = new gmaps.Map($('#map-canvas')[0], mapOptions);
 
 			var mapRef = this.map;
 			var viewRef = this;
-
+			
 			google.maps.event.addListener(mapRef, "idle", function(){
 			
 				viewRef.ready = true;
@@ -210,44 +243,21 @@ define(['jquery',
 					
 					//If the map is at the minZoom, i.e. zoomed out all the way so the whole world is visible, do not apply the spatial filter
 					if(viewRef.map.getZoom() == mapOptions.minZoom){
+						console.log('at minimum zoom');		
 						if(!viewRef.hasZoomed){
 							return;
 						}	
 						viewRef.resetMap();	
 					}
 					else{
-						console.log("zoom level " + viewRef.map.getZoom());
-						
 						//Get the Google map bounding box
 						var boundingBox = mapRef.getBounds();
 						
 						//Set the search model spatial filters
 						searchModel.set('north', boundingBox.getNorthEast().lat());
-						searchModel.set('west',  boundingBox.getSouthWest().lng());
+						searchModel.set('west', boundingBox.getSouthWest().lng());
 						searchModel.set('south', boundingBox.getSouthWest().lat());
-						searchModel.set('east',  boundingBox.getNorthEast().lng());
-						
-						//Determine the precision of geohashes to search for
-						var zoom = mapRef.getZoom(),
-							precision;
-						
-						if(zoom <= 5) precision = 2;
-						else if(zoom <= 7) precision = 3;
-						else if (zoom <= 11) precision = 4;
-						else if (zoom <= 13) precision = 5;
-						else if (zoom <= 15) precision = 6;
-						else if (zoom <= 19) precision = 7;
-						
-						//Encode the Google Map bounding box into geohash
-						var geohashNorth = boundingBox.getNorthEast().lat(),
-							geohashWest  = boundingBox.getSouthWest().lng(),
-							geohashSouth = boundingBox.getSouthWest().lat(),
-							geohashEast	 = boundingBox.getNorthEast().lng(),
-							geohashBBoxes = nGeohash.bboxes(geohashSouth, geohashWest, geohashNorth, geohashEast, precision);
-						
-						//Save our geohash search settings
-						searchModel.set('geohashes', geohashBBoxes);
-						searchModel.set('geohashLevel', precision);
+						searchModel.set('east', boundingBox.getNorthEast().lng());
 						
 						//Set the search model map filters
 						searchModel.set('map', {
@@ -271,6 +281,7 @@ define(['jquery',
 			
 			//Let the view know we have zoomed on the map
 			google.maps.event.addListener(mapRef, "zoom_changed", function(){
+				console.log('has zoomed');
 				viewRef.allowSearch = true;
 				viewRef.hasZoomed = true;
 			});
@@ -293,7 +304,10 @@ define(['jquery',
 			}
 			
 			//Reset the map settings
-			mapModel.clear();
+			searchModel.set('map', {
+				zoom: null,
+				center: null
+			});
 			
 			this.allowSearch = false;
 			
@@ -337,37 +351,265 @@ define(['jquery',
 		showResults: function (page) {
 			console.log('showing results');
 			
-			//Get the page number
 			var page = appModel.get("page");
 			if (page == null) {
 				page = 0;
 			}
-			
-			//Style the UI as loading
+					
 			this.loading();
 			
-			//Set the sort order based on user choice
 			var sortOrder = searchModel.get('sortOrder');
+			
+			appSearchResults.setrows(200);
 			appSearchResults.setSort(sortOrder);
 			
-			//Specify which fields to retrieve
-			var fields = "id,title,origin,pubDate,dateUploaded,abstract,resourceMap,beginDate,endDate,read_count_i,geohash_9";
+			var fields = "id,title,origin,pubDate,dateUploaded,abstract,resourceMap,beginDate,endDate,read_count_i";
 			if(gmaps){
 				fields += ",northBoundCoord,southBoundCoord,eastBoundCoord,westBoundCoord";
 			}
 			appSearchResults.setfields(fields);
 			
-			//Get the query
-			var query = searchModel.getQuery();
+			//Create the filter terms from the search model and create the query
+			var query = "formatType:METADATA+-obsoletedBy:*";
+			var filterQuery = "";
 			
-			//Specify which facets to retrieve
-			if(gmaps){ //If we have Google Maps enabled
-				var geohashes = ["geohash_1", "geohash_2", "geohash_3", "geohash_4", "geohash_5", "geohash_6", "geohash_7", "geohash_8", "geohash_9"]
-			    appSearchResults.facet = _.union(appSearchResults.facet, geohashes);
+			//Function here to check for spaces in a string - we'll use this to url encode the query
+			var needsQuotes = function(entry){
+				//Check for spaces
+				var space = null;
+				
+				space = entry.indexOf(" ");
+				
+				if(space >= 0){
+					return true;
+				}
+				
+				//Check for the colon : character
+				var colon = null;
+				colon = entry.indexOf(":");
+				if(colon >= 0){
+					return true;
+				}
+				
+				return false;
+			};
+			
+			/* Add trim() function for IE*/
+			if(typeof String.prototype.trim !== 'function') {
+				  String.prototype.trim = function() {
+				    return this.replace(/^\s+|\s+$/g, ''); 
+				  }
+			}
+			
+			//**Get all the search model attributes**
+		
+			//resourceMap
+			var resourceMap = searchModel.get('resourceMap');
+			if(resourceMap){
+				filterQuery += '&fq=resourceMap:*';
+			}
+			
+			// attribute
+			var thisAttribute = null;
+			var attribute = searchModel.get('attribute');
+			
+			for (var i=0; i < attribute.length; i++){
+				
+				//Trim the spaces off
+				thisAttribute = attribute[i].trim();
+				
+				// Does this need to be wrapped in quotes?
+				if (needsQuotes(thisAttribute)){
+					thisAttribute = thisAttribute.replace(" ", "%20");
+					thisAttribute = "%22" + thisAttribute + "%22";
+				}
+				// TODO: surround with **?
+				filterQuery += "&fq=attribute:" + thisAttribute;
+				
+			}
+			
+			// characteristic
+			var thisCharacteristic = null;
+			var characteristic = searchModel.get('characteristic');
+			
+			for (var i=0; i < characteristic.length; i++){
+				
+				//Trim the spaces off
+				thisCharacteristic = characteristic[i].trim();
+				
+				// encode the semantic URI
+				thisCharacteristic = "%22" + encodeURIComponent(thisCharacteristic) + "%22";
+				
+				// add to the query
+				filterQuery += "&fq=characteristic_sm:" + thisCharacteristic;
+				
+			}
+			
+			// standard
+			var thisStandard = null;
+			var standard = searchModel.get('standard');
+			
+			for (var i=0; i < standard.length; i++){
+				
+				//Trim the spaces off
+				thisStandard = standard[i].trim();
+				
+				// encode the semantic URI
+				thisStandard = "%22" + encodeURIComponent(thisStandard) + "%22";
+				
+				// add to the query
+				filterQuery += "&fq=standard_sm:" + thisStandard;
+				
+			}
+			
+			//All
+			var thisAll = null;
+			var all = searchModel.get('all');
+			for(var i=0; i < all.length; i++){
+				//Trim the spaces off
+				thisAll = all[i].trim();
+				
+				//Does this need to be wrapped in quotes?
+				if(needsQuotes(thisAll)){
+					thisAll = thisAll.replace(" ", "%20");
+					filterQuery += "&fq=*%22" + thisAll + "%22*";
+				}
+				else{
+					filterQuery += "&fq=" + thisAll;
+				}
+			}
+			
+			//Creator
+			var thisCreator = null;
+			var creator = searchModel.get('creator');
+			for(var i=0; i < creator.length; i++){
+				//Trim the spaces off
+				thisCreator = creator[i].trim();
+				
+				//Does this need to be wrapped in quotes?
+				if(needsQuotes(thisCreator)){
+					thisCreator = thisCreator.replace(" ", "%20");
+					filterQuery += "&fq=origin:*%22" + thisCreator + "%22*";
+				}
+				else{
+					filterQuery += "&fq=origin:*" + thisCreator + "*";
+				}
+			}
+			
+			//Taxon
+			var taxon = searchModel.get('taxon');
+			var thisTaxon = null;
+			for (var i=0; i < taxon.length; i++){
+				//Trim the spaces off
+				thisTaxon = taxon[i].trim();
+				
+				// Does this need to be wrapped in quotes?
+				if (needsQuotes(thisTaxon)){
+					thisTaxon = thisTaxon.replace(" ", "%20");
+					thisTaxon = "%22" + thisTaxon + "%22";
+				}
+				
+				filterQuery += "&fq=(" +
+							   "family:*" + thisTaxon + "*" +
+							   " OR " +
+							   "species:*" + thisTaxon + "*" +
+							   " OR " +
+							   "genus:*" + thisTaxon + "*" +
+							   " OR " +
+							   "kingdom:*" + thisTaxon + "*" +
+							   " OR " +
+							   "phylum:*" + thisTaxon + "*" +
+							   " OR " +
+							   "order:*" + thisTaxon + "*" +
+							   " OR " +
+							   "class:*" + thisTaxon + "*" +
+							   ")";
+			}
+			
+			// Additional criteria - both field and value are provided
+			var additionalCriteria = searchModel.get('additionalCriteria');
+			for (var i=0; i < additionalCriteria.length; i++){
+				filterQuery += "&fq=" + additionalCriteria[i];
+			}
+			
+			// Theme restrictions from Registry Model
+			var registryCriteria = registryModel.get('searchFields');
+			_.each(registryCriteria, function(value, key, list) {
+				filterQuery += "&fq=" + value;
+			});
+			
+			//Custom query (passed from the router)
+			var customQuery = searchModel.get('customQuery');
+			if(customQuery){
+				query += customQuery;
+			}
+			
+			//Year
+			//Get the types of year to be searched first
+			var pubYear  = searchModel.get('pubYear');
+			var dataYear = searchModel.get('dataYear');
+			if (pubYear || dataYear){
+				//Get the minimum and maximum years chosen
+				var yearMin = searchModel.get('yearMin');
+				var yearMax = searchModel.get('yearMax');	
+				
+				//Add to the query if we are searching data coverage year
+				if(dataYear){
+					//Add to the main query because there can be hundreds of year variations cluttering our filter cache
+					query += "+beginDate:%5B" + yearMin + "-01-01T00:00:00Z%20TO%20*%5D" +
+							 "+endDate:%5B*%20TO%20" + yearMax + "-12-31T00:00:00Z%5D";
+				}
+				//Add to the query if we are searching publication year
+				if(pubYear){
+					query += "+dateUploaded:%5B" + yearMin + "-01-01T00:00:00Z%20TO%20" + yearMax + "-12-31T00:00:00Z%5D";				
+				}
+			}
+			
+			//Map
+			//Add to the main query because there can be thousands of lat/long variations cluttering our filter cache
+			if(searchModel.get('north')!=null){
+				query += "+southBoundCoord:%7B" + searchModel.get('south') + "%20TO%20" + searchModel.get('north') + "%7D" + 
+						 "+northBoundCoord:%7B" + searchModel.get('south') + "%20TO%20" + searchModel.get('north') + "%7D";
+				
+				if (searchModel.get('west') > searchModel.get('east')) {
+					query += 
+						"+eastBoundCoord:("
+						+ "%7B" + searchModel.get('west') + "%20TO%20" + "180" + "%7D"
+						+ "%20OR%20"
+						+ "%7B" + "-180" + "%20TO%20" + searchModel.get('east') + "%7D"
+						+ ")"
+						+ "+westBoundCoord:(" 
+						+ "%7B" + searchModel.get('west') + "%20TO%20" + "180" + "%7D"
+						+ "%20OR%20"
+						+ "%7B" + "-180" + "%20TO%20" + searchModel.get('east') + "%7D"
+						+ ")"
+						;
+				} else {
+					query += 
+						"+eastBoundCoord:%7B" + searchModel.get('west') + "%20TO%20" + searchModel.get('east') + "%7D" +
+						"+westBoundCoord:%7B" + searchModel.get('west') + "%20TO%20" + searchModel.get('east') + "%7D";
+				}
+			}
+			
+			//Spatial string
+			var thisSpatial = null;
+			var spatial = searchModel.get('spatial');
+			for(var i=0; i < spatial.length; i++){
+				//Trim the spaces off
+				thisSpatial = spatial[i].trim();
+				
+				//Does this need to be wrapped in quotes?
+				if(needsQuotes(thisSpatial)){
+					thisSpatial = thisSpatial.replace(" ", "%20");
+					query += "&fq=site:*%22" + thisSpatial + "%22*";
+				}
+				else{
+					query += "&fq=site:*" + thisSpatial + "*";
+				}
 			}
 			
 			//Run the query
-			appSearchResults.setQuery(query);
+			appSearchResults.setQuery(query + filterQuery);
 			
 			//Show or hide the reset filters button
 			if(searchModel.filterCount() > 0){
@@ -917,7 +1159,7 @@ define(['jquery',
 		},
 		
 		//Get the facet counts
-		getAutoCompletes: function(){
+		getFacetCounts: function(){
 			var viewRef = this;
 			
 			var facetQuery = "q=" + appSearchResults.currentquery +
@@ -944,14 +1186,13 @@ define(['jquery',
 
 			$.get(appModel.get('queryServiceUrl') + facetQuery, function(data, textStatus, xhr) {
 				
-				var facetCounts = data.facet_counts.facet_fields,
-					facetLimit  = 999;
+				var facetCounts = data.facet_counts.facet_fields;
 								
 				//***Set up the autocomplete (jQueryUI) feature for each text input****//				
 				//For the 'all' filter, use keywords
 				var allSuggestions = facetCounts.keywords;
 				var rankedSuggestions = new Array();
-				for (var i=0; i < Math.min(allSuggestions.length-1, facetLimit); i+=2) {
+				for (var i=0; i < allSuggestions.length-1; i+=2) {
 					rankedSuggestions.push({value: allSuggestions[i], label: allSuggestions[i] + " (" + allSuggestions[i+1] + "+)"});
 				}
 
@@ -997,7 +1238,7 @@ define(['jquery',
 						attributeNameSuggestions, 
 						attributeLabelSuggestions);
 				var rankedAttributeSuggestions = new Array();
-				for (var i=0; i < Math.min(attributeSuggestions.length-1, facetLimit); i+=2) {
+				for (var i=0; i < attributeSuggestions.length-1; i+=2) {
 					rankedAttributeSuggestions.push({value: attributeSuggestions[i], label: attributeSuggestions[i] + " (" + attributeSuggestions[i+1] + ")"});
 				}
 				$('#attribute_input').autocomplete({
@@ -1032,7 +1273,7 @@ define(['jquery',
 				// suggest characteristics
 				var characteristicSuggestions = facetCounts.characteristic_sm;
 				var rankedCharacteristicSuggestions = new Array();
-				for (var i=0; i < Math.min(characteristicSuggestions.length-1, facetLimit); i+=2) {
+				for (var i=0; i < characteristicSuggestions.length-1; i+=2) {
 					rankedCharacteristicSuggestions.push({value: characteristicSuggestions[i], label: characteristicSuggestions[i].substring(characteristicSuggestions[i].indexOf("#")) });
 				}
 				$('#characteristic_input').autocomplete({
@@ -1067,7 +1308,7 @@ define(['jquery',
 				// suggest standards
 				var standardSuggestions = facetCounts.standard_sm;
 				var rankedStandardSuggestions = new Array();
-				for (var i=0; i < Math.min(standardSuggestions.length-1, facetLimit); i+=2) {
+				for (var i=0; i < standardSuggestions.length-1; i+=2) {
 					rankedStandardSuggestions.push({value: standardSuggestions[i], label: standardSuggestions[i].substring(standardSuggestions[i].indexOf("#")) });
 				}
 				$('#standard_input').autocomplete({
@@ -1098,11 +1339,11 @@ define(['jquery',
 						at: "left bottom"				
 					}
 				});
-			
+				
 				// suggest creator names/organizations
 				var originSuggestions = facetCounts.origin;
 				var rankedOriginSuggestions = new Array();
-				for (var i=0; i < Math.min(originSuggestions.length-1, facetLimit); i+=2) {
+				for (var i=0; i < originSuggestions.length-1; i+=2) {
 					rankedOriginSuggestions.push({value: originSuggestions[i], label: originSuggestions[i] + " (" + originSuggestions[i+1] + ")"});
 				}
 				$('#creator_input').autocomplete({
@@ -1154,7 +1395,7 @@ define(['jquery',
 						orderSuggestions,
 						classSuggestions);
 				var rankedTaxonSuggestions = new Array();
-				for (var i=0; i < Math.min(taxonSuggestions.length-1, facetLimit); i+=2) {
+				for (var i=0; i < taxonSuggestions.length-1; i+=2) {
 					rankedTaxonSuggestions.push({value: taxonSuggestions[i], label: taxonSuggestions[i] + " (" + taxonSuggestions[i+1] + ")"});
 				}
 				$('#taxon_input').autocomplete({
@@ -1190,7 +1431,7 @@ define(['jquery',
 				// suggest location names
 				var spatialSuggestions = facetCounts.site;
 				var rankedSpatialSuggestions = new Array();
-				for (var i=0; i < Math.min(spatialSuggestions.length-1, facetLimit); i+=2) {
+				for (var i=0; i < spatialSuggestions.length-1; i+=2) {
 					rankedSpatialSuggestions.push({value: spatialSuggestions[i], label: spatialSuggestions[i] + " (" + spatialSuggestions[i+1] + ")"});
 				}
 				$('#spatial_input').autocomplete({
@@ -1222,29 +1463,29 @@ define(['jquery',
 						collision: "flip"
 					}
 				});
-			}, "json");
+			});
 		},
 		
 		/* add a marker for objects */
-	/*	addObjectMarker: function(markerDetails) {
+		addObjectMarker: function(solrResult) {
 			
 			//Skip this if there is no map
 			if (!gmaps) {
 				return;
 			}
 			
-			// Retrieve all the details about this marker. 
-			var pid = ("id" in markerDetails) ? markerDetails.get('id') : 0,
-				n   = ("northBoundCoord" in markerDetails) ? markerDetails.get('northBoundCoord') : null,
-				s   = ("southBoundCoord" in markerDetails) ? markerDetails.get('southBoundCoord') : null,
-				e   = ("eastBoundCoord" in markerDetails)  ? markerDetails.get('eastBoundCoord')  : null,
-				w   = ("westBoundCoord" in markerDetails)  ? markerDetails.get('westBoundCoord')  : null;
+			var pid = solrResult.get('id');
 			
 			// if already on map
 			if (this.markers[pid]) {
 				return;
 			}
 			
+			//Get the four bounding lat/longs for this data item
+			var n = solrResult.get('northBoundCoord');
+			var s = solrResult.get('southBoundCoord');
+			var e = solrResult.get('eastBoundCoord');
+			var w = solrResult.get('westBoundCoord');
 			
 			//Create Google Map LatLng objects out of our coordinates
 			var latLngSW = new gmaps.LatLng(s, w);
@@ -1252,7 +1493,7 @@ define(['jquery',
 			var latLngNW = new gmaps.LatLng(n, w);
 			var latLngSE = new gmaps.LatLng(s, e);
 			
-			//Get the centroid location of this data item
+			//Get the centertroid location of this data item
 			var bounds = new gmaps.LatLngBounds(latLngSW, latLngNE);
 			var latLngCEN = bounds.getCenter();
 			
@@ -1268,13 +1509,13 @@ define(['jquery',
 			var infoWindow = new gmaps.InfoWindow({
 				content:
 					'<div class="gmaps-infowindow">'
-					+ '<h4>' + markerDetails.get('title') 
+					+ '<h4>' + solrResult.get('title') 
 					+ ' ' 
 					+ '<a href="#view/' + pid + '" >'
-					+ markerDetails.get('id') 
+					+ solrResult.get('id') 
 					+ '</a>'
 					+ '</h4>'
-					+ '<p>' + markerDetails.get('abstract') + '</p>'
+					+ '<p>' + solrResult.get('abstract') + '</p>'
 					+ '</div>',
 				isOpen: false,
 				disableAutoPan: true,
@@ -1283,7 +1524,7 @@ define(['jquery',
 			
 			// A small info window with just the title for each marker
 			var titleWindow = new gmaps.InfoWindow({
-				content: markerDetails.get('title'),
+				content: solrResult.get('title'),
 				disableAutoPan: true,
 				maxWidth: 250
 			});
@@ -1291,10 +1532,10 @@ define(['jquery',
 			//Set up the options for each marker
 			var markerOptions = {
 				position: latLngCEN,
-				title: markerDetails.get('title'),
+				title: solrResult.get('title'),
 				icon: this.markerImage,
 				zIndex: 99999,
-				id: pid,
+				id: solrResult.get('id'),
 				map: this.map
 			};
 			
@@ -1350,7 +1591,7 @@ define(['jquery',
 			});
 			
 		},
-	*/	
+		
 		openMarker: function(e){
 			//Exit if maps are not in use
 			if((appModel.get('searchMode') != 'map') || (!gmaps)){
@@ -1360,31 +1601,33 @@ define(['jquery',
 			//Clear the panning timeout
 			window.clearTimeout(this.centerTimeout);
 			
-			//Get the attributes about this dataset
 			var id = $(e.target).attr('data-id');
-			var centerGeohash = $(e.target).attr("data-center");
 			
 			//The mouseover event might be triggered by a nested element, so loop through the parents to find the id
 			if(typeof id == "undefined"){
 				$(e.target).parents().each(function(){
 					if(typeof $(this).attr('data-id') != "undefined"){
 						id = $(this).attr('data-id');
-						centerGeohash = $(this).attr('data-center');
 					}
 				});
 			}
 			
-			//Zoom to the center of this dataset
-			var decodedGeohash = nGeohash.decode(centerGeohash);
-			var position = new google.maps.LatLng(decodedGeohash.latitude, decodedGeohash.longitude);
-
+			gmaps.event.trigger(this.markers[id], 'mouseover');
+			
+			var position = this.markers[id].getPosition();
+			
+			var long = position.lng();
+			var lat = position.lat();
+			
+			var newPosition = new gmaps.LatLng(lat, long);
+			
 			//Do not trigger a new search when we pan
 			this.allowSearch = false;
 			
 			//Pan the map
-			this.map.panTo(position);	
+			this.map.panTo(newPosition);	
 		},
-	/*	
+		
 		closeMarker: function(e){
 			//Exit if maps are not in use
 			if((appModel.get('searchMode') != 'map') || (!gmaps)){
@@ -1406,7 +1649,7 @@ define(['jquery',
 			gmaps.event.trigger(this.markers[id], 'mouseout');
 			
 			//Pan back to the map center so the map will reflect the current spatial filter bounding box
-			var mapCenter = mapModel.get('center');			
+			var mapCenter = searchModel.get('map').center;			
 			if(mapCenter !== null){
 				var viewRef = this;
 			
@@ -1458,7 +1701,7 @@ define(['jquery',
 				delete viewRef.markers[pid];
 			});
 		},
-*/
+		
 		// Add a single SolrResult item to the list by creating a view for it, and
 		// appending its element to the DOM.
 		addOne: function (result) {
@@ -1474,10 +1717,10 @@ define(['jquery',
 			this.$results.append(view.render().el);
 			
 			// map it
-		/*	if(gmaps && (appModel.get('searchMode') == 'map')){
+			if(gmaps && (appModel.get('searchMode') == 'map')){
 				this.addObjectMarker(result);	
 			}
-		*/
+
 		},
 
 		/** Add all items in the **SearchResults** collection
@@ -1497,15 +1740,21 @@ define(['jquery',
 			//Clear the results list before we start adding new rows
 			this.$results.html('');
 			
-			//Remove all the existing tiles on the map
-			this.removeTiles();
-			this.removeMarkers();
-			
 			//If there are no results, display so
 			var numFound = appSearchResults.models.length;
 			if (numFound == 0){
 				this.$results.html('<p id="no-results-found">No results found.</p>');
 			}
+
+			//Load the first 25 results first so the list has visible results while the rest load in the background
+			var min = 25;
+			min = Math.min(min, numFound);
+			var i = 0;
+			for (i = 0; i < min; i++) {
+				var element = appSearchResults.models[i];
+
+				this.addOne(element);
+			};
 			
 			//Remove the loading class and styling
 			this.$results.removeClass('loading');
@@ -1514,19 +1763,7 @@ define(['jquery',
 			var viewRef = this;
 			var intervalId = setInterval(function() {
 				if (viewRef.ready) {
-					clearInterval(intervalId);
-										
-					//--First map all the results--
-					if(gmaps){
-						//Draw all the tiles on the map to represent the datasets
-						viewRef.drawTiles();	
-						
-						//Remove the loading styles from the map
-						$("#map-container").removeClass("loading");
-					}
-					
-					//--- Add all the results to the list ---
-					for (i = 0; i < numFound; i++) {
+					for (i = min; i < numFound; i++) {
 						var element = appSearchResults.models[i];
 						viewRef.addOne(element);
 					};
@@ -1535,555 +1772,48 @@ define(['jquery',
 					$(".tooltip-this").tooltip();
 					$(".popover-this").popover();
 
+					if(gmaps){
+						// clean out any old markers
+						viewRef.mergeMarkers();
+						
+						// show the clustered markers
+						var mcOptions = {
+							gridSize: 25,
+							maxZoom: 15,
+							styles: [
+							{height: 20, width: 20, url: viewRef.markerImage20, textColor: '#FFFFFF'},
+							{height: 30, width: 30, url: viewRef.markerImage30, textColor: '#FFFFFF'},
+							{height: 40, width: 40, url: viewRef.markerImage40, textColor: '#FFFFFF'},
+							{height: 50, width: 50, url: viewRef.markerImage50, textColor: '#FFFFFF'},
+							{height: 60, width: 60, url: viewRef.markerImage60, textColor: '#FFFFFF'},
+							]
+						};
+						
+						if ( viewRef.markerCluster ) {
+							viewRef.markerCluster.clearMarkers();
+						}
+						
+						viewRef.markerCluster = new MarkerClusterer(viewRef.map, _.values(viewRef.markers), mcOptions);
+						
+						viewRef.markerClusters = viewRef.markerCluster.getMarkers();
+						
+						//Pan the map to the center of our results
+						if((!viewRef.allowSearch) && (viewRef.masterBounds)){
+							var center = viewRef.masterBounds.getCenter();
+							viewRef.map.panTo(center);
+						}
+						
+						$("#map-container").removeClass("loading");
+					}
+					
+					clearInterval(intervalId);
 				}
 				
 			}, 500);
 			
 			//After all the results are loaded, query for our facet counts in the background
-			this.getAutoCompletes();
-		},
-		
-		drawTiles: function(){
-			
-			this.removeTiles();
-			
-			TextOverlay.prototype = new google.maps.OverlayView();
-			
-			/** @constructor */
-			function TextOverlay(options) {
-				// Now initialize all properties.
-				  this.bounds_ = options.bounds;
-				  this.map_    = options.map;
-				  this.text    = options.text;
-				  this.color   = options.color;
-				  
-				  var length = options.text.toString().length;
-				  if(length == 1) this.width = 8;
-				  else if(length == 2) this.width = 17;
-				  else if(length == 3) this.width = 25;
-				  else if(length == 4) this.width = 32;
-				  else if(length == 5) this.width = 40;
+			this.getFacetCounts();
 
-				  // We define a property to hold the image's div. We'll
-				  // actually create this div upon receipt of the onAdd()
-				  // method so we'll leave it null for now.
-				  this.div_ = null;
-				  
-				  // Explicitly call setMap on this overlay
-				  this.setMap(options.map);
-			}
-			
-			TextOverlay.prototype.onAdd = function() {
-					
-			  // Create the DIV and set some basic attributes.
-			  var div = document.createElement('div');
-			  div.style.color = this.color;
-			  div.style.fontSize = "15px";
-			  div.style.position = 'absolute';
-			  div.style.zIndex = "999";
-
-			  // Create an IMG element and attach it to the DIV.
-			  div.innerHTML = this.text;
-
-			  // Set the overlay's div_ property to this DIV
-			  this.div_ = div;
-
-			  // We add an overlay to a map via one of the map's panes.
-			  // We'll add this overlay to the overlayLayer pane.
-			  var panes = this.getPanes();
-			  panes.overlayLayer.appendChild(div);
-			}
-			
-			TextOverlay.prototype.draw = function() {
-				// Size and position the overlay. We use a southwest and northeast
-				  // position of the overlay to peg it to the correct position and size.
-				  // We need to retrieve the projection from this overlay to do this.				  
-				  var overlayProjection = this.getProjection();
-
-				  // Retrieve the southwest and northeast coordinates of this overlay
-				  // in latlngs and convert them to pixels coordinates.
-				  // We'll use these coordinates to resize the DIV.
-				  var sw = overlayProjection.fromLatLngToDivPixel(this.bounds_.getSouthWest());
-				  var ne = overlayProjection.fromLatLngToDivPixel(this.bounds_.getNorthEast());
-				  
-				  // Resize the image's DIV to fit the indicated dimensions.
-				  var div = this.div_;
-				  var width = this.width;
-				  var height = 20;
-				  
-				  div.style.left = (sw.x - width/2) + 'px';
-				  div.style.top = (ne.y - height/2) + 'px';
-				  div.style.width = width + 'px';
-				  div.style.height = height + 'px';				  
-				  div.style.width = width + "px";
-				  div.style.height = height + "px";
-
-			}
-			
-			TextOverlay.prototype.onRemove = function() {
-				  this.div_.parentNode.removeChild(this.div_);
-				  this.div_ = null;
-			}
-			
-			//Determine the geohash level we will use to draw tiles
-			var currentZoom     = this.map.getZoom(),
-				geohashLevelNum	= mapModel.determineGeohashLevel(currentZoom),
-				geohashLevel    = "geohash_" + geohashLevelNum,
-				geohashes       = appSearchResults.facetCounts[geohashLevel];
-						
-			//Find the totals of our geohash tiles
-			var total      = appSearchResults.header.get("numFound"),
-				totalTiles = geohashes.length,
-				maxCount   = _.max(geohashes),
-				viewRef	   = this;
-			
-			//Now draw a tile for each geohash facet
-			for(var i=0; i<geohashes.length-1; i+=2){
-				
-				//Convert this geohash to lat,long values 
-				var decodedGeohash = nGeohash.decode(geohashes[i]),
-					latLngCenter   = new google.maps.LatLng(decodedGeohash.latitude, decodedGeohash.longitude),
-					geohashBox 	   = nGeohash.decode_bbox(geohashes[i]),
-					swLatLng	   = new google.maps.LatLng(geohashBox[0], geohashBox[1]),
-					neLatLng	   = new google.maps.LatLng(geohashBox[2], geohashBox[3]),
-					bounds 		   = new google.maps.LatLngBounds(swLatLng, neLatLng),
-					tileCount	   = geohashes[i+1],
-					percent		   = tileCount/maxCount,
-					useBins		   = (total > 200) ? true : false,
-					marker,
-					count,
-					color;
-								
-				//When there is only one dataset in this tile, we will display a marker
-				if ((tileCount == 1) && (currentZoom >= 7)){
-					//Find a more exact location for this marker, by looking in the geohash_9 facets
-					var geohash9Values = appSearchResults.facetCounts.geohash_9,
-						exactLocation;
-					
-					//We can start at the index from this geohash array since they are sorted by index - this will save time for geohash values towards the end of the array
-					for(var x = i; x < geohash9Values.length; x+=2){
-						if(geohash9Values[x].indexOf(geohashes[i]) == 0){
-							//This is the most exact geohash location
-							exactLocation = geohash9Values[x];
-							var decodedLocation = nGeohash.decode(exactLocation),
-							     latLngLocation = new google.maps.LatLng(decodedLocation.latitude, decodedLocation.longitude);
-							
-							viewRef.markerGeohashes.push(exactLocation);
-							
-							break; //Stop looking
-						}
-					}
-					
-					//Draw the marker
-					var marker = this.drawMarker(latLngLocation);
-					
-					//Save this marker in the view
-					this.markers.push({marker: marker, geohash: exactLocation});
-				}
-				else{
-					if(!useBins){
-						//Determine the style of the tile depending on the percentage of datasets
-						if (percent < .20){
-							color = mapModel.get("tileColors").level1; 
-						}
-						else if (percent < .40){
-							color = mapModel.get("tileColors").level2; 
-						}
-						else if (percent < .70){
-							color = mapModel.get("tileColors").level3; 
-						}
-						else if (percent < .80) {
-							color = mapModel.get("tileColors").level4; 
-						}
-						else{
-							color = mapModel.get("tileColors").level5; 
-						}
-					}
-					else{
-						//Determine the style of the tile depending on the number of datasets
-						if (tileCount < 10){
-							color = mapModel.get("tileColors").level1; 
-						}
-						else if (tileCount < 50){
-							color = mapModel.get("tileColors").level2; 
-						}
-						else if (tileCount < 100){
-							color = mapModel.get("tileColors").level3; 
-						}
-						else if (tileCount < 1000) {
-							color = mapModel.get("tileColors").level4; 
-						}
-						else{
-							color = mapModel.get("tileColors").level5; 
-						}
-				}
-					//Add the count to the tile
-					var countLocation = new google.maps.LatLngBounds(latLngCenter, latLngCenter);
-									
-					//Draw the tile label with the dataset count
-					count = new TextOverlay({
-						bounds: countLocation,
-						   map: this.map,
-						  text: tileCount,
-						 color: mapModel.get("tileLabelColor")
-					});
-					
-					//Set up the default tile options 
-					var tileOptions = {
-						      fillColor: color, 
-						      map: this.map,
-						      visible: true,
-						      bounds: bounds
-						    };
-					
-					//Merge these options with any tile options set in the map model
-					var modelTileOptions =  mapModel.get("tileOptions");					
-					for(var attr in modelTileOptions){
-						tileOptions[attr] = modelTileOptions[attr];
-					}
-					
-					//Draw this tile
-					var tile = this.drawTile(tileOptions, count);
-					
-					//Save the geohashes for tiles in the view for later
-					this.tileGeohashes.push(geohashes[i]);
-					
-					//Save our tiles in the view
-					this.tiles.push({text: count, shape: tile, geohash: geohashes[i]});
-				}
-			}
-			
-			//After all the tiles and markers are added, retrieve details about them
-			if(this.markerGeohashes.length > 0) this.addMarkerInfoWindows();
-			if(mapModel.isMaxZoom(this.map)) this.addTileInfoWindows();
-		},
-					
-		drawTile: function(options, label){
-			//Exit if maps are not in use
-			if((appModel.get('searchMode') != 'map') || (!gmaps)){
-				return false;
-			}
-			
-			// Add the tile for these datasets to the map
-			var tile = new google.maps.Rectangle(options);
-					
-			var viewRef = this;
-			
-			//Change styles when the tile is hovered on
-			google.maps.event.addListener(tile, 'mouseover', function(event) {
-				
-				//Change the tile style on hover
-				tile.setOptions(mapModel.get('tileOnHover'));
-				
-				//Change the label color on hover
-				var div = label.div_;
-				div.style.color = mapModel.get("tileLabelColorOnHover");
-				label.div_ = div;
-			});
-			
-			//Change the styles back after the tile is hovered on
-			google.maps.event.addListener(tile, 'mouseout', function(event) {
-								
-				//Change back the tile to it's original styling
-				tile.setOptions(options);
-				
-				//Change back the label color
-				var div = label.div_;
-				div.style.color = mapModel.get("tileLabelColor");
-				label.div_ = div;
-			});
-			
-			//If we are at the max zoom, we will display an info window. If not, we will zoom in.
-			if(!mapModel.isMaxZoom(viewRef.map)){
-				//Zoom in when the tile is clicked on
-				gmaps.event.addListener(tile, 'click', function(clickEvent) {
-					//Change the center
-					viewRef.map.panTo(clickEvent.latLng);
-					
-					//Get this tile's bounds
-					var bounds = tile.getBounds();
-								
-					//Change the zoom
-					viewRef.map.fitBounds(bounds);	
-				});
-			}
-			
-			return tile;
-		},
-		
-		drawMarker: function(latLng){
-			//Exit if maps are not in use
-			if((appModel.get('searchMode') != 'map') || (!gmaps)){
-				return false;
-			}
-			
-			//Set up the options for each marker
-			var markerOptions = {
-				position: latLng,
-				icon: mapModel.get("markerImage"),
-				zIndex: 99999,
-				map: this.map
-			};
-			
-			//Create the marker and add to the map
-			var marker = new google.maps.Marker(markerOptions);
-		
-			return marker;
-		},
-		
-		/**
-		 * Get the details on each marker
-		 * And create an infowindow for that marker
-		 */		
-		addMarkerInfoWindows: function(){
-			//Exit if maps are not in use
-			if((appModel.get('searchMode') != 'map') || (!gmaps)){
-				return false;
-			}	
-			
-			//Clone the Search model
-			var searchModelClone = searchModel.clone(),
-				geohashLevel = 9,
-				viewRef = this,
-				infoWindows = [],
-				markers = this.markers;
-			
-			//Change the geohash filter to match our tiles 
-			searchModelClone.set("geohashLevel", geohashLevel);
-			searchModelClone.set("geohashes", this.markerGeohashes);
-			
-			//Now run a query to get a list of documents that are represented by our tiles
-			var query = "q=" + searchModelClone.getQuery() + 
-						"&wt=json" +
-						"&fl=id,title,geohash_9,abstract" +
-						"&rows=1000";
-			
-			$.get(appModel.get('queryServiceUrl') + query, function(data, textStatus, xhr){
-				var docs = data.response.docs;
-				
-				//Create an infoWindow for each document
-				_.each(docs, function(doc, key, list){
-					
-					var marker;
-					
-					//Find the marker for this document				
-					for(var i=0; i<markers.length; i++){
-						//Is this the marker for this document?
-						if(markers[i].geohash == doc.geohash_9[0]){
-							marker = markers[i];
-							break;
-						}
-					}
-					
-					//Create the infoWindow
-					if(!marker) return;
-					
-					var decodedGeohash = nGeohash.decode(marker.geohash),
-						position 	   = new google.maps.LatLng(decodedGeohash.latitude, decodedGeohash.longitude);
-					
-					//The infowindow
-					var infoWindow = new gmaps.InfoWindow({
-						content:
-							'<div class="gmaps-infowindow">'
-							+ "<h4>" + doc.title + "</h4>"
-							+ "<a href='#view/" + doc.id + "'>" + doc.id + "</a>"
-							+ "<p>" + doc.abstract + "</p>"
-							+ "<p><a href='#view/" + doc.id + "'>Read more</a></p>"
-							+ '</div>',
-						isOpen: false,
-						disableAutoPan: true,
-						maxWidth: 250,
-						position: position
-					});	
-					
-					//Store this infowindow in the view
-					viewRef.markerInfoWindows.push(infoWindow);
-					
-					marker = marker.marker;
-					
-					//Show the info window upon marker click
-					gmaps.event.addListener(marker, 'click', function() {
-						infoWindow.open(viewRef.map, marker);
-						infoWindow.isOpen = true;
-						
-						//Close all other infowindows 
-						viewRef.closeInfoWindows(infoWindow);
-					});
-					
-					//Close the infowindow upon any click on the map
-					gmaps.event.addListener(viewRef.map, 'click', function() {
-						infoWindow.close();
-						infoWindow.isOpen = false;
-					});
-				});
-			});
-		},
-		
-		/**
-		 * Get the details on each tile - a list of ids and titles for each dataset contained in that tile
-		 * And create an infowindow for that tile
-		 */
-		addTileInfoWindows: function(){	
-			//Exit if maps are not in use
-			if((appModel.get('searchMode') != 'map') || (!gmaps)){
-				return false;
-			}
-			
-			//Clone the Search model
-			var searchModelClone = searchModel.clone(),
-				geohashLevel = mapModel.determineGeohashLevel(this.map.getZoom()),
-				geohashName	 = "geohash_" + geohashLevel,
-				viewRef = this,
-				infoWindows = [];
-			
-			//Change the geohash filter to match our tiles 
-			searchModelClone.set("geohashLevel", geohashLevel);
-			searchModelClone.set("geohashes", this.tileGeohashes);
-			
-			//Now run a query to get a list of documents that are represented by our tiles
-			var query = "q=" + searchModelClone.getQuery() + 
-						"&wt=json" +
-						"&fl=id,title,geohash_9," + geohashName +
-						"&rows=1000";
-			
-			$.get(appModel.get('queryServiceUrl') + query, function(data, textStatus, xhr){
-				//Make an infoWindow for each doc
-				var docs = data.response.docs;
-				
-				//For each tile, loop through the docs to find which ones to include in its infoWindow	
-				_.each(viewRef.tiles, function(tile, key, list){
-					
-					var infoWindowContent = "";
-								
-					_.each(docs, function(doc, key, list){
-						
-						//Is this document in this tile?
-						for(var i=0; i<doc[geohashName].length; i++){
-							if(doc[geohashName][i] == tile.geohash){
-								//Add this doc to the infoWindow content
-								infoWindowContent += "<a href='#view/" + doc.id + "'>" + doc.title +"</a> (" + doc.id +") <br/>"
-								break;
-							}	
-						}							
-					});
-						
-					//The center of the tile
-					var decodedGeohash = nGeohash.decode(tile.geohash),
-						tileCenter 	   = new google.maps.LatLng(decodedGeohash.latitude, decodedGeohash.longitude);
-						
-					//The infowindow
-					var infoWindow = new gmaps.InfoWindow({
-						content:
-							'<div class="gmaps-infowindow">'
-							+ '<h4> Datasets located here </h4>'
-							+ "<p>" + infoWindowContent + "</p>"
-							+ '</div>',
-						isOpen: false,
-						disableAutoPan: true,
-						maxWidth: 250,
-						position: tileCenter
-					});
-					
-					viewRef.tileInfoWindows.push(infoWindow);
-					
-					//Zoom in when the tile is clicked on
-					gmaps.event.addListener(tile.shape, 'click', function(clickEvent) {
-						
-						//--- We are at max zoom, display an infowindow ----//
-						if(mapModel.isMaxZoom(viewRef.map)){
-							
-							//Find the infowindow that belongs to this tile in the view
-							infoWindow.open(viewRef.map);
-							infoWindow.isOpen = true;
-							
-							//Close all other infowindows 
-							viewRef.closeInfoWindows(infoWindow);
-						}
-						
-						//------ We are not at max zoom, so zoom into this tile ----//
-						else{
-							//Change the center
-							viewRef.map.panTo(clickEvent.latLng);
-							
-							//Get this tile's bounds
-							var bounds = tile.shape.getBounds();
-									
-							//Change the zoom
-							viewRef.map.fitBounds(bounds);	
-						}
-					});
-					
-					//Close the infowindow upon any click on the map
-					gmaps.event.addListener(viewRef.map, 'click', function() {						
-						infoWindow.close();
-						infoWindow.isOpen = false;
-					});
-					
-					infoWindows[tile.geohash] = infoWindow;
-				});
-				
-				viewRef.infoWindows = infoWindows;
-				
-			},
-			"json");
-		},
-		
-		/**
-		 * Iterate over each infowindow that we have stored in the view and close it.
-		 * Pass an infoWindow object to this function to keep that infoWindow open/skip it
-		 */
-		closeInfoWindows: function(except){
-			var infoWindowLists = [this.markerInfoWindows, this.tileInfoWindows];
-
-			_.each(infoWindowLists, function(infoWindows, key, list){
-				//Iterate over all the marker infowindows and close all of them except for this one
-				for(var i=0; i<infoWindows.length; i++){
-					if((infoWindows[i].isOpen) && (infoWindows[i] != except)){
-						//Close this info window and stop looking, since only one of each kind should be open anyway
-						infoWindows[i].close();
-						infoWindows[i].isOpen = false;
-						i = infoWindows.length;
-					}
-				}
-			});
-		},
-		
-		/**
-		 * Remove all the tiles and text from the map
-		 **/
-		removeTiles: function(){
-			//Exit if maps are not in use
-			if((appModel.get('searchMode') != 'map') || (!gmaps)){
-				return false;
-			}
-			
-			//Remove the tile from the map
-			_.each(this.tiles, function(tile, key, list){
-				if(tile.shape) tile.shape.setMap(null);
-				if(tile.text)  tile.text.setMap(null);
-			});
-			
-			//Reset the tile storage in the view
-			this.tiles = [];
-			this.tileGeohashes = [];
-			this.tileInfoWindows = [];
-		},
-		
-		removeMarkers: function(){
-			//Exit if maps are not in use
-			if((appModel.get('searchMode') != 'map') || (!gmaps)){
-				return false;
-			}
-			
-			//Remove the marker from the map
-			_.each(this.markers, function(marker, key, list){
-				marker.marker.setMap(null);
-			});
-			
-			//Reset the marker storage in the view
-			this.markers = [];
-			this.markerGeohashes = [];
-			this.markerInfoWindows = [];
 		},
 		
 		// Communicate that the page is loading
@@ -2154,6 +1884,7 @@ define(['jquery',
 		
 		routeToMetadata: function(e){
 			var id = $(e.target).attr('data-id');
+			console.log($(e.target));
 			
 			//If the user clicked on the download button or any element with the class 'stop-route', we don't want to navigate to the metadata
 			if ($(e.target).hasClass('stop-route')){
