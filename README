@@ -1,24 +1,41 @@
-MetacatUI Themes
+About the IoE Data Gateway
+-----------------------------
+
+The Institute on Ecosystems (IoE) Data Gateway is an Montana University System data 
+repository and discovery system designed to facilitate ecological and environmental research.
+
+For scientists, the IoE Data Gateway is an efficient way to discover, access and interpret 
+complex ecological data. Thanks to rich contextual information, scientists are able to 
+integrate and analyze discovered data with less effort. The data originate from a highly-
+distributed set of field stations, laboratories, research sites, and individual researchers. 
+The foundation of the IoE Data Gateway is rich, detailed metadata provided by the researchers 
+that collect data, which promotes both automated and manual integration of data into new projects.
+
+The IoE Data Gateway is powered by the open-source Metacat data management system. It is 
+optimized for handling data sets described using the Ecological Metadata Language, but can 
+store any XML-based document. You can learn more about Metacat here: 
+(https://data.rcg.montana.edu/catalog/docs/). While the Metacat catalog that powers the 
+IoE Data Gateway is adept at storing and querying data, using the APIs for interacting with 
+the application is not very user friendly. This prompts the need for a simple user interface 
+to help scientists upload and retrieve data sets. The IoE Data Gateway, a web application built 
+using the Backbone.js framework fills this need. The current IoE Data Gateway is a modified 
+version of Metacat UI (release 1.5.1) developed by the National Center for Ecological Analysis 
+and Synthesis (NCEAS).
+
+
+
+Using Themes
 -----------------
 All the default models, collections, views, routers, and templates required to run a default 
-Metacat UI are in the 'js/' directory.
+Metacat UI instance are in the 'js/' directory.
+
 The "default" theme is included in the 'js/themes/' directory and is used to style the default 
-resources with CSS and images.
+resources with CSS and images. The customized IOE theme provides alternative resources for 
+items that override the default theme. This theme is a subdirectory in 'js/themes'
+named "ioe" and mimics the structure of the default resources in 'js/'. The IoE Data Gateway 
+currently uses the "ioe" theme, but users may switch to the "default" theme, or may choose to
+develop and entirely new theme. 
 
-Additional themes (e.g., "knb") provide alternative resources for 
-items that will override the default theme. Each theme is a subdirectory in 'js/themes'
-named to match the theme name and mimics the structure of the default resources in 'js/'.
-
-To switch themes:
--Edit the top-level 'loader.js' file and specify the name of the theme to use.
-That's it!
-
-Required items for a theme:
-	'js/themes/<theme>/config.js'
-	'js/themes/<theme>/css/metacatui.css'
-	'js/themes/<theme>/img/favicon-32.png'
-
-About CSS:
 Each theme uses a 'js/themes/<theme>/css/metacatui.css' file that is pulled in during the initial
 application loading. A copy of the default can be used and modified as needed.
 
@@ -32,4 +49,175 @@ Example (using navbar):
 -Edit 'js/themes/<theme>/config.js' to include:
 	'templates/navbar.html' : 'themes/' + theme + '/templates/navbar.html',
 	
+Make sure your new theme includes all the required items for any theme:
+	'js/themes/<theme>/config.js'
+	'js/themes/<theme>/css/metacatui.css'
+	'js/themes/<theme>/img/favicon-32.png'
+
+To switch between themes:
+-Edit the top-level 'index.html' file and specify the name of the theme to use.
+
+
+
+Upgrading to Newer Versions
+---------------------------------
+
+Follow the steps below during major software upgrades or deployment of new releases of the 
+NCEAS MetacatUI application.
+
+1. Open the tope-level index.html file of the new Metacat UI source code and change the 
+settings as follows:
+
+'''
+data-theme="ioe"
+data-metacat-context="catalog"
+data-map-key="Your-Google-Maps-Javascript-API-Key-Goes-Here"
+'''
+
+6. Open the /js/models/AppModel.js file and edit it to as follows:
+
+'''
+/*global define */
+define(['jquery', 'underscore', 'backbone'], 				
+	function($, _, Backbone) {
+	'use strict';
+
+	// Application Model
+	// ------------------
+	var AppModel = Backbone.Model.extend({
+		// This model contains all of the attributes for the Application
+		defaults: {
+			headerType: 'default',
+			searchMode: 'map',
+			username: null,
+			fullName: null,
+			sortOrder: 'dateUploaded+desc',
+			pid: null,
+			anchorId: null,
+			page: null,
+			profileQuery: null,
+			baseUrl: window.location.origin,
+			// the most likely item to change is the Metacat deployment context
+			context: '/catalog',
+			d1Service: '/d1/mn/v1',
+			viewServiceUrl: null,
+			packageServiceUrl: null,
+			publishServiceUrl: null,
+			authServiceUrl: null,
+			queryServiceUrl: null,
+			metaServiceUrl: null,
+			registryServiceUrl: null,
+			ldapwebServiceUrl: null,
+			metacatServiceUrl: null,
+			objectServiceUrl: null
+		},
+		
+		initialize: function() {
+			
+			//For IE
+			if (!window.location.origin) {
+				var baseUrl = window.location.protocol + "//" + window.location.host;
+				
+				this.set('baseUrl', baseUrl);
+			}
+			
+			// these are pretty standard, but can be customized if needed
+			this.set('viewServiceUrl', this.get('baseUrl') + this.get('context') + this.get('d1Service') + '/views/metacatui/');
+			this.set('packageServiceUrl', this.get('baseUrl') + this.get('context') + this.get('d1Service') + '/package/');
+			this.set('publishServiceUrl', this.get('baseUrl') + this.get('context') + this.get('d1Service') + '/publish/');
+			this.set('authServiceUrl', this.get('baseUrl') + this.get('context') + this.get('d1Service') + '/isAuthorized/');
+			this.set('queryServiceUrl', this.get('baseUrl') + this.get('context') + this.get('d1Service') + '/query/solr/');
+			this.set('metaServiceUrl', this.get('baseUrl') + this.get('context') + this.get('d1Service') + '/meta/');
+			this.set('objectServiceUrl', this.get('baseUrl') + this.get('context') + this.get('d1Service') + '/object/');
+			this.set('registryServiceUrl', this.get('baseUrl') + this.get('context') + '/cgi-bin/register-dataset.cgi');
+			this.set('ldapwebServiceUrl', this.get('baseUrl') + this.get('context') + '/cgi-bin/ldapweb.cgi');
+			this.set('metacatServiceUrl', this.get('baseUrl') + this.get('context') + '/metacat');
+			
+		}
 	
+		
+	});
+	return AppModel;		
+});
+'''
+
+7. Open the /js/views/DataCatalogView.js file and edit the renderMap function as follows:
+
+'''
+		renderMap: function() {
+			
+			//If gmaps isn't enabled or loaded with an error, use list mode
+			if (!gmaps) {
+				this.ready = true;
+				appModel.set('searchMode', 'list');
+				return;
+			}		
+
+			// If the list mode is currently in use, no need to render the map
+			if(appModel.get('searchMode') == 'list'){
+				this.ready = true;
+				return;
+			}
+			
+			$("body").addClass("mapMode");				
+					
+			//If the spatial filters are set, rezoom and recenter the map to those filters
+			if(searchModel.get('north')){
+				var mapZoom = searchModel.get('map').zoom;
+				var mapCenter = searchModel.get('map').center;
+			}
+			else{
+				var mapZoom = 5;
+				var mapCenter = new gmaps.LatLng(40.0, -100.0);
+			}
+			
+			var mapOptions = {
+			    zoom: mapZoom,
+				minZoom: 5,
+			    center: mapCenter,
+				disableDefaultUI: true,
+			    zoomControl: true,
+			    zoomControlOptions: {
+				          style: google.maps.ZoomControlStyle.SMALL,
+				          position: google.maps.ControlPosition.TOP_LEFT
+				        },
+				panControl: false,
+				scaleControl: false,
+				streetViewControl: false,
+				mapTypeControl: true,
+				mapTypeControlOptions:{
+						position: google.maps.ControlPosition.TOP_LEFT
+				},
+			    mapTypeId: google.maps.MapTypeId.TERRAIN
+			};
+'''
+
+8. Ensure that the /js/themes/ioe directory exists and that the app.js file is 
+configured accordingly:
+
+'''
+var theme = theme || "ioe";
+var themeMap = 
+{
+	'*': {
+		// Template overrides are provided here
+		
+		// Resources (js) omit extension
+                'views/RegistryView' : 'themes/' + theme + '/views/RegistryView',
+		//'routers/router' : 'themes/' + theme + '/routers/router',
+		
+		// Templates include extension
+		'templates/app.html' : 'themes/' + theme + '/templates/app.html',
+		'templates/appHead.html' : 'themes/' + theme + '/templates/appHead.html',
+		'templates/navbar.html' : 'themes/' + theme + '/templates/navbar.html',
+		'templates/footer.html' : 'themes/' + theme + '/templates/footer.html',
+		'templates/mainContent.html' : 'themes/' + theme + '/templates/mainContent.html',
+		'templates/altHeader.html' : 'themes/' + theme + '/templates/altHeader.html',
+		'templates/defaultHeader.html' : 'themes/' + theme + '/templates/defaultHeader.html',
+		'templates/about.html' : 'themes/' + theme + '/templates/about.html',
+                'templates/ldapAccountTools.html' : 'themes/' + theme + '/templates/ldapAccountTools.html'
+		}
+};
+'''
+
+9. Ensure that all of the templates and views referenced in app.js are present in the mapped directories.
